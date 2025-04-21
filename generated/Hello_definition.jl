@@ -36,6 +36,16 @@
   ]
   return ODESystem(eqs, t, vars, params; systems = [], defaults, name)
 end
+const Hello_cache = Ref{Vector{Any}}(Any[nothing, nothing])
+function Hello_model(; simplify=true)
+  cache_index = simplify + 1
+  simplifier = simplify ? structural_simplify : identity
+  if Hello_cache[][cache_index] === nothing
+    Hello_cache[][cache_index] = simplifier(Hello(; name = :Hello))
+  else
+    Hello_cache[cache_index]
+  end
+end
 export Hello
 Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(Hello)) = print(io,
   """<div style="height: 100%; width: 100%; background-color: white"><div style="margin: auto; height: 500px; width: 500px; padding: 200px"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000"

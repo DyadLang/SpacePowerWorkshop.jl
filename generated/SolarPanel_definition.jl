@@ -67,6 +67,16 @@
   ]
   return ODESystem(eqs, t, vars, params; systems = [], defaults, name)
 end
+const SolarPanel_cache = Ref{Vector{Any}}(Any[nothing, nothing])
+function SolarPanel_model(; simplify=true)
+  cache_index = simplify + 1
+  simplifier = simplify ? structural_simplify : identity
+  if SolarPanel_cache[][cache_index] === nothing
+    SolarPanel_cache[][cache_index] = simplifier(SolarPanel(; name = :SolarPanel))
+  else
+    SolarPanel_cache[cache_index]
+  end
+end
 export SolarPanel
 Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(SolarPanel)) = print(io,
   """<div style="height: 100%; width: 100%; background-color: white"><div style="margin: auto; height: 500px; width: 500px; padding: 200px"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000"

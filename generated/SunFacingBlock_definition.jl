@@ -22,6 +22,16 @@
   ]
   return ODESystem(eqs, t, vars, []; systems = [], defaults, name)
 end
+const SunFacingBlock_cache = Ref{Vector{Any}}(Any[nothing, nothing])
+function SunFacingBlock_model(; simplify=true)
+  cache_index = simplify + 1
+  simplifier = simplify ? structural_simplify : identity
+  if SunFacingBlock_cache[][cache_index] === nothing
+    SunFacingBlock_cache[][cache_index] = simplifier(SunFacingBlock(; name = :SunFacingBlock))
+  else
+    SunFacingBlock_cache[cache_index]
+  end
+end
 export SunFacingBlock
 Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(SunFacingBlock)) = print(io,
   """<div style="height: 100%; width: 100%; background-color: white"><div style="margin: auto; height: 500px; width: 500px; padding: 200px"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000"

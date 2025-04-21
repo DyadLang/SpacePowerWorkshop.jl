@@ -6,6 +6,7 @@ using ModelingToolkit
 using ModelingToolkit: t_nounits as t
 using ModelingToolkitStandardLibrary.Blocks
 using Plots
+using Example1
 
 ################ 1. Orbital mechanics ################
 # Compute the satellite's position over time using orbital parameters.
@@ -112,12 +113,12 @@ facing_sun_interp = QuadraticInterpolation(facing_sun, times_adj)
         ex_theta = TimeVaryingFunction(f=theta_interp)                    # angle between solar panel normal and Sun direction [rad]
         ex_sunlight = TimeVaryingFunction(f=sunlight_interp)      # 1 if satellite is in sunlight, 0 otherwise
         ex_facing_sun = TimeVaryingFunction(f=facing_sun_interp)
-        mdl = SolarPanel()
+        panel = SolarPanel()
     end
     @equations begin
-        connect(ex_theta.y, mdl.θ)
-        connect(ex_sunlight.y, mdl.in_sunlight)
-        connect(ex_facing_sun.y, mdl.sun_facing)
+        connect(ex_theta.output.u, panel.θ)
+        connect(ex_sunlight.output.u, panel.in_sunlight)
+        connect(ex_facing_sun.output.u, panel.sun_facing)
     end
 end 
 
@@ -127,12 +128,12 @@ end
 prob = ODEProblem(mdl, [], (0, end_time), [])
 sol = solve(prob; saveat=times_adj)
 
-plot(sol.t[1:1728000], sol[mdl.P][1:1728000], label="power", xlabel="time", ylabel="power [W]", title="Power Generated", size = (1000,1000))
-plot(sol.t[1:1728000], sol[mdl.P][1:1728000], label="power", xlabel="time", ylabel="power [W]", title="Power Generated", size = (1000,1000)) 
-plot(sol.t[1:86400], sol[mdl.P][1:86400], label="power", xlabel="time", ylabel="power [W]", title="Power Generated")
+plot(sol.t[1:1728000], sol[mdl.panel.P][1:1728000], label="power", xlabel="time", ylabel="power [W]", title="Power Generated", size = (1000,1000))
+plot(sol.t[1:1728000], sol[mdl.panel.P][1:1728000], label="power", xlabel="time", ylabel="power [W]", title="Power Generated", size = (1000,1000)) 
+plot(sol.t[1:86400], sol[mdl.panel.P][1:86400], label="power", xlabel="time", ylabel="power [W]", title="Power Generated")
 
-plot(sol.t[1:43200], sol[mdl.theta][1:43200], label="θ")
-plot(sol.t[1:43200], sol[mdl.sun_facing][1:43200], label="sun_facing")
-plot!(sol.t[1:43200], sol[cos(mdl.θ)][1:43200], label="cos(θ)")
-plot(sol.t[1:43200], sol[mdl.in_sunlight][1:43200], label="sunlight")
-plot(sol.t[1:3200], sol[mdl.G_eff][1:3200], label="G_eff")
+plot(sol.t[1:43200], sol[mdl.panel.θ][1:43200], label="θ")
+plot(sol.t[1:43200], sol[mdl.panel.sun_facing][1:43200], label="sun_facing")
+plot!(sol.t[1:43200], sol[cos(mdl.panel.θ)][1:43200], label="cos(θ)")
+plot(sol.t[1:43200], sol[mdl.panel.in_sunlight][1:43200], label="sunlight")
+plot(sol.t[1:3200], sol[mdl.panel.G_eff][1:3200], label="G_eff")

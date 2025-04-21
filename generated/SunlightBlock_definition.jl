@@ -22,6 +22,16 @@
   ]
   return ODESystem(eqs, t, vars, []; systems = [], defaults, name)
 end
+const SunlightBlock_cache = Ref{Vector{Any}}(Any[nothing, nothing])
+function SunlightBlock_model(; simplify=true)
+  cache_index = simplify + 1
+  simplifier = simplify ? structural_simplify : identity
+  if SunlightBlock_cache[][cache_index] === nothing
+    SunlightBlock_cache[][cache_index] = simplifier(SunlightBlock(; name = :SunlightBlock))
+  else
+    SunlightBlock_cache[cache_index]
+  end
+end
 export SunlightBlock
 Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(SunlightBlock)) = print(io,
   """<div style="height: 100%; width: 100%; background-color: white"><div style="margin: auto; height: 500px; width: 500px; padding: 200px"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000"
