@@ -5,39 +5,67 @@
 
 
 """
-   Hello(; name, k, x0)
+   MPPT(; name, startTime, samplePeriod, VmpRef, ImpRef, n)
 
 ## Parameters: 
 
 | Name         | Description                         | Units  |   Default value |
 | ------------ | ----------------------------------- | ------ | --------------- |
-| `k`         |                          | 1/s  |   1 |
-| `x0`         |                          | K  |   99 |
+| `startTime`         |                          | --  |   0 |
+| `samplePeriod`         |                          | --  |   1 |
+| `VmpRef`         |                          | --  |    |
+| `ImpRef`         |                          | --  |    |
+| `n`         |                          | --  |    |
+
+## Connectors
+
+ * `power` - This connector represents a real signal as an input to a component ([`RealInput`](@ref))
+ * `vRef` - This connector represents a real signal as an output from a component ([`RealOutput`](@ref))
 
 ## Variables
 
 | Name         | Description                         | Units  | 
 | ------------ | ----------------------------------- | ------ | 
-| `x`         |                          | m  | 
+| `dv`         |                          | --  | 
+| `dpower`         |                          | --  | 
+| `firstTrigger`         |                          | --  | 
+| `sampleTrigger`         |                          | --  | 
+| `counter`         |                          | --  | 
+| `signv`         |                          | --  | 
 """
-@component function Hello(; name, k=1, x0=99)
+@component function MPPT(; name, startTime=0, samplePeriod=1, VmpRef=nothing, ImpRef=nothing, n=nothing)
   params = @parameters begin
-    (k::Float64 = k)
-    (x0::Float64 = x0)
+    (startTime::Float64 = startTime)
+    (samplePeriod::Float64 = samplePeriod)
+    (VmpRef::Float64 = VmpRef)
+    (ImpRef::Float64 = ImpRef)
+    (n::Float64 = n)
   end
   vars = @variables begin
-    x(t)
+    power(t), [input = true]
+    vRef(t), [output = true]
+    dv(t)
+    dpower(t)
+    firstTrigger(t)
+    sampleTrigger(t)
+    counter(t)
+    signv(t)
   end
   defaults = Dict([
-    x => (x0),
+    firstTrigger => (true),
+    counter => (1),
   ])
-  eqs = Equation[
-    D(x) ~ -k * x
+  initialization_eqs = [
+    signv ~ -1
   ]
-  return ODESystem(eqs, t, vars, params; systems = [], defaults, name)
+  eqs = Equation[
+    dv ~ VmpRef / n
+    dpower ~ VmpRef * ImpRef / n
+  ]
+  return ODESystem(eqs, t, vars, params; systems = [], defaults, name, initialization_eqs)
 end
-export Hello
-Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(Hello)) = print(io,
+export MPPT
+Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(MPPT)) = print(io,
   """<div style="height: 100%; width: 100%; background-color: white"><div style="margin: auto; height: 500px; width: 500px; padding: 200px"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000"
     overflow="visible" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
       <defs>

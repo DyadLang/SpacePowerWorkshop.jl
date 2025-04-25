@@ -5,39 +5,54 @@
 
 
 """
-   Hello(; name, k, x0)
+   VoltageSource(; name, uV)
+
+The input signal `V` is provided as the voltage difference across the positive to# the negative pins.
 
 ## Parameters: 
 
 | Name         | Description                         | Units  |   Default value |
 | ------------ | ----------------------------------- | ------ | --------------- |
-| `k`         |                          | 1/s  |   1 |
-| `x0`         |                          | K  |   99 |
+| `uV`         |                          | V  |   1 |
+
+## Connectors
+
+ * `p` - ([`Pin`](@ref))
+ * `n` - ([`Pin`](@ref))
+ * `V` - This connector represents a real signal as an input to a component ([`RealInput`](@ref))
 
 ## Variables
 
 | Name         | Description                         | Units  | 
 | ------------ | ----------------------------------- | ------ | 
-| `x`         |                          | m  | 
+| `v`         |                          | V  | 
+| `i`         |                          | A  | 
 """
-@component function Hello(; name, k=1, x0=99)
+@component function VoltageSource(; name, uV=1)
   params = @parameters begin
-    (k::Float64 = k)
-    (x0::Float64 = x0)
+    (uV::Float64 = uV)
   end
   vars = @variables begin
-    x(t)
+    V(t), [input = true]
+    v(t)
+    i(t)
+  end
+  systems = @named begin
+    p = __JSML__Pin()
+    n = __JSML__Pin()
   end
   defaults = Dict([
-    x => (x0),
   ])
   eqs = Equation[
-    D(x) ~ -k * x
+    v ~ p.v - n.v
+    i ~ p.i
+    p.i + n.i ~ 0
+    v ~ V * uV
   ]
-  return ODESystem(eqs, t, vars, params; systems = [], defaults, name)
+  return ODESystem(eqs, t, vars, params; systems, defaults, name)
 end
-export Hello
-Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(Hello)) = print(io,
+export VoltageSource
+Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(VoltageSource)) = print(io,
   """<div style="height: 100%; width: 100%; background-color: white"><div style="margin: auto; height: 500px; width: 500px; padding: 200px"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000"
     overflow="visible" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
       <defs>

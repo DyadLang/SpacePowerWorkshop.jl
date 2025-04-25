@@ -1,0 +1,19 @@
+component PVArrayVerification
+
+    Gn = BlockComponents.Const(k=1000)
+    Tn = BlockComponents.Const(k=298.15)
+    source = VoltageSource()
+    ground = Ground()
+    pVArray = PVArray()
+    rampVoltage = BlockComponents.Ramp(start_time=0, duration=1, height=45, offset=-10)
+  
+relations
+
+    connect(rampVoltage.y, source.V)
+    connect(Gn.y, pVArray.G)
+    connect(Tn.y, pVArray.T)
+    connect(pVArray.p, source.p)
+    connect(pVArray.n, source.n)
+    connect(ground.g, source.n)
+
+end

@@ -1,0 +1,10 @@
+# Creates a circuit component that measures the voltage across it. Analogous to an ideal voltmeter.
+component VoltageSensor
+  p = Pin() 
+  n = Pin() 
+  v = RealOutput() 
+relations
+  p.i = 0
+  n.i = 0
+  v = p.v-n.v
+end

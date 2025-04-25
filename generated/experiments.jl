@@ -5,8 +5,19 @@
 ### Instead, update the JSML source code and regenerate this file
 
 
+include("CurrentSensor_experiment.jl")
+include("CurrentSource_experiment.jl")
+include("Ground_experiment.jl")
 include("Hello_experiment.jl")
+include("MPPT_experiment.jl")
+include("PVArray_experiment.jl")
+include("PVArrayVerification_experiment.jl")
+include("PVCell_experiment.jl")
+include("Resistor_experiment.jl")
 include("SolarPanel_experiment.jl")
 include("SunlightBlock_experiment.jl")
 include("SunFacingBlock_experiment.jl")
 include("ThetaBlock_experiment.jl")
+include("SolarPanelSimple_experiment.jl")
+include("VoltageSensor_experiment.jl")
+include("VoltageSource_experiment.jl")

@@ -5,39 +5,66 @@
 
 
 """
-   Hello(; name, k, x0)
+   SolarPanelSimple(; name, G, A, η_ref, T_ref, β, α, ϵ, σ)
 
 ## Parameters: 
 
 | Name         | Description                         | Units  |   Default value |
 | ------------ | ----------------------------------- | ------ | --------------- |
-| `k`         |                          | 1/s  |   1 |
-| `x0`         |                          | K  |   99 |
+| `G`         |                          | --  |   1361 |
+| `A`         |                          | --  |   5 |
+| `η_ref`         |                          | --  |   0.3 |
+| `T_ref`         |                          | K  |   300 |
+| `β`         |                          | --  |   0.004 |
+| `α`         |                          | --  |   0.9 |
+| `ϵ`         |                          | --  |   0.8 |
+| `σ`         |                          | --  |   5.67e-8 |
+
+## Connectors
+
+ * `θ` - This connector represents a real signal as an input to a component ([`RealInput`](@ref))
+ * `in_sunlight` - This connector represents a real signal as an input to a component ([`RealInput`](@ref))
 
 ## Variables
 
 | Name         | Description                         | Units  | 
 | ------------ | ----------------------------------- | ------ | 
-| `x`         |                          | m  | 
+| `G_eff`         |                          | --  | 
+| `T`         |                          | K  | 
+| `η`         |                          | --  | 
+| `P`         |                          | --  | 
 """
-@component function Hello(; name, k=1, x0=99)
+@component function SolarPanelSimple(; name, G=1361, A=5, η_ref=0.3, T_ref=300, β=0.004, α=0.9, ϵ=0.8, σ=5.67e-8)
   params = @parameters begin
-    (k::Float64 = k)
-    (x0::Float64 = x0)
+    (G::Float64 = G)
+    (A::Float64 = A)
+    (η_ref::Float64 = η_ref)
+    (T_ref::Float64 = T_ref)
+    (β::Float64 = β)
+    (α::Float64 = α)
+    (ϵ::Float64 = ϵ)
+    (σ::Float64 = σ)
   end
   vars = @variables begin
-    x(t)
+    θ(t), [input = true]
+    in_sunlight(t), [input = true]
+    G_eff(t)
+    T(t)
+    η(t)
+    P(t)
   end
   defaults = Dict([
-    x => (x0),
   ])
   eqs = Equation[
-    D(x) ~ -k * x
+    T ~ ((α * G_eff) / (ϵ * σ)) ^ (1 / 4)
+    G_eff ~ max(G * cos(θ) * in_sunlight, 0)
+    η ~ η_ref * (1 - β * (T - T_ref))
+    P ~ G_eff * A * η
   ]
   return ODESystem(eqs, t, vars, params; systems = [], defaults, name)
 end
-export Hello
-Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(Hello)) = print(io,
+export SolarPanelSimple
+Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(SolarPanelSimple)) = print(io,
   """<div style="height: 100%; width: 100%; background-color: white"><div style="margin: auto; height: 500px; width: 500px; padding: 200px"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000"
     overflow="visible" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
       <defs>

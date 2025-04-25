@@ -5,39 +5,35 @@
 
 
 """
-   Hello(; name, k, x0)
+   VoltageSensor(; name)
 
-## Parameters: 
+Creates a circuit component that measures the voltage across it. Analogous to an ideal voltmeter.
 
-| Name         | Description                         | Units  |   Default value |
-| ------------ | ----------------------------------- | ------ | --------------- |
-| `k`         |                          | 1/s  |   1 |
-| `x0`         |                          | K  |   99 |
+## Connectors
 
-## Variables
-
-| Name         | Description                         | Units  | 
-| ------------ | ----------------------------------- | ------ | 
-| `x`         |                          | m  | 
+ * `p` - ([`Pin`](@ref))
+ * `n` - ([`Pin`](@ref))
+ * `v` - This connector represents a real signal as an output from a component ([`RealOutput`](@ref))
 """
-@component function Hello(; name, k=1, x0=99)
-  params = @parameters begin
-    (k::Float64 = k)
-    (x0::Float64 = x0)
-  end
+@component function VoltageSensor(; name)
   vars = @variables begin
-    x(t)
+    v(t), [output = true]
+  end
+  systems = @named begin
+    p = __JSML__Pin()
+    n = __JSML__Pin()
   end
   defaults = Dict([
-    x => (x0),
   ])
   eqs = Equation[
-    D(x) ~ -k * x
+    p.i ~ 0
+    n.i ~ 0
+    v ~ p.v - n.v
   ]
-  return ODESystem(eqs, t, vars, params; systems = [], defaults, name)
+  return ODESystem(eqs, t, vars, []; systems, defaults, name)
 end
-export Hello
-Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(Hello)) = print(io,
+export VoltageSensor
+Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(VoltageSensor)) = print(io,
   """<div style="height: 100%; width: 100%; background-color: white"><div style="margin: auto; height: 500px; width: 500px; padding: 200px"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000"
     overflow="visible" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
       <defs>

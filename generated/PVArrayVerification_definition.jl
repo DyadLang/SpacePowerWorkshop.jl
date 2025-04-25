@@ -5,39 +5,31 @@
 
 
 """
-   Hello(; name, k, x0)
-
-## Parameters: 
-
-| Name         | Description                         | Units  |   Default value |
-| ------------ | ----------------------------------- | ------ | --------------- |
-| `k`         |                          | 1/s  |   1 |
-| `x0`         |                          | K  |   99 |
-
-## Variables
-
-| Name         | Description                         | Units  | 
-| ------------ | ----------------------------------- | ------ | 
-| `x`         |                          | m  | 
+   PVArrayVerification(; name)
 """
-@component function Hello(; name, k=1, x0=99)
-  params = @parameters begin
-    (k::Float64 = k)
-    (x0::Float64 = x0)
-  end
-  vars = @variables begin
-    x(t)
+@component function PVArrayVerification(; name)
+  systems = @named begin
+    Gn = BlockComponents.Const(k=1000)
+    Tn = BlockComponents.Const(k=298.15)
+    source = Example1.VoltageSource()
+    ground = Example1.Ground()
+    pVArray = Example1.PVArray()
+    rampVoltage = BlockComponents.Ramp(start_time=0, duration=1, height=45, offset=-10)
   end
   defaults = Dict([
-    x => (x0),
   ])
   eqs = Equation[
-    D(x) ~ -k * x
+    rampVoltage.y ~ source.V
+    Gn.y ~ pVArray.G
+    Tn.y ~ pVArray.T
+    connect(pVArray.p, source.p)
+    connect(pVArray.n, source.n)
+    connect(ground.g, source.n)
   ]
-  return ODESystem(eqs, t, vars, params; systems = [], defaults, name)
+  return ODESystem(eqs, t, [], []; systems, defaults, name)
 end
-export Hello
-Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(Hello)) = print(io,
+export PVArrayVerification
+Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(PVArrayVerification)) = print(io,
   """<div style="height: 100%; width: 100%; background-color: white"><div style="margin: auto; height: 500px; width: 500px; padding: 200px"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000"
     overflow="visible" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
       <defs>

@@ -1,0 +1,10 @@
+# Creates a circuit component that measures the current flowing through it. Analogous to an ideal ammeter.
+component CurrentSensor
+  p = Pin() 
+  n = Pin() 
+  i = RealOutput()
+relations
+  p.v = n.v
+  p.i = i
+  n.i = -i
+end

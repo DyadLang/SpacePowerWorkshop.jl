@@ -5,23 +5,40 @@
 
 
 """
-   SolarPanel(; name, G, A, η_ref, T_ref, β, α, ϵ, σ)
+   SolarPanel(; name, G, A, η_ref, T_ref, β1, α1, ϵ, σ, V_oc, V_mpp, area, q, Ns, k, T0, Isc, Im, Vm, Voc, β2, α2, λ, Irs)
 
 ## Parameters: 
 
 | Name         | Description                         | Units  |   Default value |
 | ------------ | ----------------------------------- | ------ | --------------- |
 | `G`         |                          | --  |   1361 |
-| `A`         |                          | --  |   5 |
+| `A`         |                          | --  |   3.377695551748622 |
 | `η_ref`         |                          | --  |   0.3 |
 | `T_ref`         |                          | K  |   300 |
-| `β`         |                          | --  |   0.004 |
-| `α`         |                          | --  |   0.9 |
+| `β1`         |                          | --  |   0.004 |
+| `α1`         |                          | --  |   0.9 |
 | `ϵ`         |                          | --  |   0.8 |
 | `σ`         |                          | --  |   5.67e-8 |
+| `V_oc`         |                          | --  |   21 |
+| `V_mpp`         |                          | --  |   17 |
+| `area`         |                          | --  |   0.0027 |
+| `q`         |                          | --  |   1.602e-19 |
+| `Ns`         |                          | --  |   1 |
+| `k`         |                          | --  |   1.38e-23 |
+| `T0`         |                          | --  |   301.15 |
+| `Isc`         |                          | --  |   area * 0.018 / 0.0001 |
+| `Im`         |                          | --  |   area * 0.0175 / 0.0001 |
+| `Vm`         |                          | --  |   2.406 |
+| `Voc`         |                          | --  |   2.72 |
+| `β2`         |                          | --  |   -0.0056 |
+| `α2`         |                          | --  |   0.00001 |
+| `λ`         |                          | --  |   38.54788528033841 |
+| `Irs`         |                          | --  |   area * 5.9419090728228655e-16 / 0.0001 |
 
 ## Connectors
 
+ * `p` - ([`Pin`](@ref))
+ * `n` - ([`Pin`](@ref))
  * `θ` - This connector represents a real signal as an input to a component ([`RealInput`](@ref))
  * `in_sunlight` - This connector represents a real signal as an input to a component ([`RealInput`](@ref))
  * `sun_facing` - This connector represents a real signal as an input to a component ([`RealInput`](@ref))
@@ -30,52 +47,79 @@
 
 | Name         | Description                         | Units  | 
 | ------------ | ----------------------------------- | ------ | 
+| `v`         |                          | V  | 
+| `i`         |                          | A  | 
 | `G_eff`         |                          | --  | 
 | `T`         |                          | K  | 
 | `η`         |                          | --  | 
 | `P`         |                          | --  | 
+| `Is`         |                          | --  | 
+| `Iph`         |                          | --  | 
+| `ΔT`         |                          | K  | 
+| `ex_term`         |                          | --  | 
 """
-@component function SolarPanel(; name, G=1361, A=5, η_ref=0.3, T_ref=300, β=0.004, α=0.9, ϵ=0.8, σ=5.67e-8)
+@component function SolarPanel(; name, G=1361, A=3.377695551748622, η_ref=0.3, T_ref=300, β1=0.004, α1=0.9, ϵ=0.8, σ=5.67e-8, V_oc=21, V_mpp=17, area=0.0027, q=1.602e-19, Ns=1, k=1.38e-23, T0=301.15, Isc=area * 0.018 / 0.0001, Im=area * 0.0175 / 0.0001, Vm=2.406, Voc=2.72, β2=-0.0056, α2=0.00001, λ=38.54788528033841, Irs=area * 5.9419090728228655e-16 / 0.0001)
   params = @parameters begin
     (G::Float64 = G)
     (A::Float64 = A)
     (η_ref::Float64 = η_ref)
     (T_ref::Float64 = T_ref)
-    (β::Float64 = β)
-    (α::Float64 = α)
+    (β1::Float64 = β1)
+    (α1::Float64 = α1)
     (ϵ::Float64 = ϵ)
     (σ::Float64 = σ)
+    (V_oc::Float64 = V_oc)
+    (V_mpp::Float64 = V_mpp)
+    (area::Float64 = area)
+    (q::Float64 = q)
+    (Ns::Float64 = Ns)
+    (k::Float64 = k)
+    (T0::Float64 = T0)
+    (Isc::Float64 = Isc)
+    (Im::Float64 = Im)
+    (Vm::Float64 = Vm)
+    (Voc::Float64 = Voc)
+    (β2::Float64 = β2)
+    (α2::Float64 = α2)
+    (λ::Float64 = λ)
+    (Irs::Float64 = Irs)
   end
   vars = @variables begin
     θ(t), [input = true]
     in_sunlight(t), [input = true]
     sun_facing(t), [input = true]
+    v(t)
+    i(t)
     G_eff(t)
     T(t)
     η(t)
     P(t)
+    Is(t)
+    Iph(t)
+    ΔT(t)
+    ex_term(t)
+  end
+  systems = @named begin
+    p = __JSML__Pin()
+    n = __JSML__Pin()
   end
   defaults = Dict([
-    T => (273),
-    P => (0),
   ])
   eqs = Equation[
-    T ~ ((α * G_eff) / (ϵ * σ)) ^ (1 / 4)
+    v ~ p.v - n.v
+    i ~ p.i
+    p.i + n.i ~ 0
+    T ~ ((α1 * G) / (ϵ * σ)) ^ (1 / 4)
     G_eff ~ G * cos(θ) * in_sunlight * sun_facing
-    η ~ η_ref * (1 - β * (T - T_ref))
-    P ~ G_eff * A * η
+    η ~ η_ref * (1 - β1 * (T - T_ref))
+    P ~ i * abs(v)
+    ΔT ~ T - T0
+    Is ~ (exp(abs(β2) * ΔT * λ / A) * G_eff * (Isc + α2 * ΔT)) / ((G_eff * Isc / Irs + 1) ^ (T0 / (ΔT + T0)) - exp((abs(β2) * ΔT * λ) / A))
+    Iph ~ G_eff * (Isc + α2 * ΔT)
+    i ~ Iph - Is * (exp((q * (-v)) / (Ns * k * A * T)) - 1)
+    ex_term ~ exp((q * (-v)) / (Ns * k * A * T))
   ]
-  return ODESystem(eqs, t, vars, params; systems = [], defaults, name)
-end
-const SolarPanel_cache = Ref{Vector{Any}}(Any[nothing, nothing])
-function SolarPanel_model(; simplify=true)
-  cache_index = simplify + 1
-  simplifier = simplify ? structural_simplify : identity
-  if SolarPanel_cache[][cache_index] === nothing
-    SolarPanel_cache[][cache_index] = simplifier(SolarPanel(; name = :SolarPanel))
-  else
-    SolarPanel_cache[cache_index]
-  end
+  return ODESystem(eqs, t, vars, params; systems, defaults, name)
 end
 export SolarPanel
 Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(SolarPanel)) = print(io,

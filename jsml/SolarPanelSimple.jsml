@@ -1,5 +1,5 @@
 
-component SolarPanel
+component SolarPanelSimple
     variable G_eff::Real
     variable T::Temperature
     variable η::Real
@@ -16,16 +16,13 @@ component SolarPanel
 
     θ = RealInput()
     in_sunlight = RealInput()
-    sun_facing = RealInput()
 relations
-    initial T = 273
-    initial P = 0.0
-
     T = ((α * G_eff)/(ϵ * σ))^(1/4)
-    G_eff = G * cos(θ) * in_sunlight * sun_facing
+    G_eff = max(G * cos(θ) * in_sunlight, 0)
     η = η_ref*(1 - β*(T - T_ref))
     P = G_eff * A * η
 end
+
 
 component SunlightBlock
     extends BlockComponents.SO

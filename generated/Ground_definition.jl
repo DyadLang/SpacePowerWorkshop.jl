@@ -5,39 +5,25 @@
 
 
 """
-   Hello(; name, k, x0)
+   Ground(; name)
 
-## Parameters: 
+## Connectors
 
-| Name         | Description                         | Units  |   Default value |
-| ------------ | ----------------------------------- | ------ | --------------- |
-| `k`         |                          | 1/s  |   1 |
-| `x0`         |                          | K  |   99 |
-
-## Variables
-
-| Name         | Description                         | Units  | 
-| ------------ | ----------------------------------- | ------ | 
-| `x`         |                          | m  | 
+ * `g` - ([`Pin`](@ref))
 """
-@component function Hello(; name, k=1, x0=99)
-  params = @parameters begin
-    (k::Float64 = k)
-    (x0::Float64 = x0)
-  end
-  vars = @variables begin
-    x(t)
+@component function Ground(; name)
+  systems = @named begin
+    g = __JSML__Pin()
   end
   defaults = Dict([
-    x => (x0),
   ])
   eqs = Equation[
-    D(x) ~ -k * x
+    g.v ~ 0
   ]
-  return ODESystem(eqs, t, vars, params; systems = [], defaults, name)
+  return ODESystem(eqs, t, [], []; systems, defaults, name)
 end
-export Hello
-Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(Hello)) = print(io,
+export Ground
+Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(Ground)) = print(io,
   """<div style="height: 100%; width: 100%; background-color: white"><div style="margin: auto; height: 500px; width: 500px; padding: 200px"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000"
     overflow="visible" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
       <defs>
