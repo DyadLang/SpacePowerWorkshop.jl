@@ -8,6 +8,8 @@ using ModelingToolkitStandardLibrary.Blocks
 using Plots
 using Example1
 using BlockComponents
+using DifferentialEquations
+using SciMLBase
 
 include("orbit_analysis.jl")
 
@@ -36,22 +38,19 @@ include("orbit_analysis.jl")
         T(t), [output=true]        # panel temperature [K]
         θ(t)    # angle between solar panel normal and Sun direction [rad]
         in_sunlight(t)  # 1 if satellite is in sunlight, 0 otherwise
-        sun_facing(t)   # 1 if solar panel is facing Sun, 0 otherwise
     end
     @components begin
         ex_theta = TimeVaryingFunction(f=theta_interp)                    # angle between solar panel normal and Sun direction [rad]
         ex_sunlight = TimeVaryingFunction(f=sunlight_interp)      # 1 if satellite is in sunlight, 0 otherwise
-        ex_facing_sun = TimeVaryingFunction(f=facing_sun_interp)    # 1 if solar panel is facing Sun, 0 otherwise
         # MPPT 
         # DC-DC converter (takes in voltage)
     end
     @equations begin
         θ ~ ex_theta.output.u
         in_sunlight ~ ex_sunlight.output.u
-        sun_facing ~ ex_facing_sun.output.u
 
         T ~ max(((α * G_eff)/(ϵ * σ))^(1/4), 2.7)
-        G_eff ~ G * cos(θ) * in_sunlight * sun_facing
+        G_eff ~ max(G * cos(θ) * in_sunlight, 0)
     end
 end 
 
@@ -63,54 +62,68 @@ plot(sol.t[1:43200], sol[temp.T][1:43200], label="temp.T")
 plot(sol.t[1:43200], sol[temp.G_eff][1:43200], label="temp.G_eff")
 plot(sol.t[1:43200], sol[temp.θ][1:43200], label="temp.θ")
 plot(sol.t[1:43200], sol[temp.in_sunlight][1:43200], label="temp.in_sunlight")
-plot(sol.t[1:43200], sol[temp.sun_facing][1:43200], label="temp.sun_facing")
+# plot(sol.t[1:43200], sol[temp.sun_facing][1:43200], label="temp.sun_facing")
+plot(sol.t[1:43200], sol[cos(temp.θ)][1:43200], label="cos(θ)")
 
 @mtkmodel PVTest begin
+    @parameters begin
+        over_v(t) = 0
+    end
+    
     @components begin 
         cell = PVCell()
         vref = VoltageSource()
         i = CurrentSensor()
-        src = BlockComponents.Ramp(;start_time=0, offset=0, height=35, duration=10)
+        # src = BlockComponents.Ramp(;start_time=0, offset=0, height=35, duration=10)
         ground = Ground()
 
-        temp = TempSensor()
+        # temp = TempSensor()
     end
 
     @equations begin 
+        cell.over_v ~ over_v
         connect(ground.g, cell.n, vref.n)
         connect(cell.p, i.n)
         connect(i.p, vref.p)
-        vref.V ~ src.y
-        # cell.G ~ 1000
+        # vref.V ~ src.y
+        vref.V ~ t*35/10
 
-        cell.G ~ temp.G_eff
-        temp.T ~ cell.T_reading
+        cell.G ~ 1000
+        # cell.G ~ temp.G_eff
+        # temp.T ~ cell.T_reading
+    end
+    @continuous_events begin
+        (cell.V.v ~ cell.Vocn) => ModelingToolkit.ImperativeAffect(modified=(;over_v), observed=(;v = vref.V, Vocn = cell.Vocn)) do m,o,c,i 
+            @show o i.t
+            return (;over_v = o.v >= o.Vocn ? 1.0 : 0.0)
+        end
     end
 end
 
-@mtkbuild test = PVTest()
-prob = ODEProblem(test, [], (0.0, end_time); guesses=[test.cell.Rs_c.i => 0])
-sol = solve(prob)
+@mtkbuild test = PVTest() # additional_passes=[ModelingToolkit.IfLifting]
+# prob = ODEProblem(test, [], (0.0, end_time))
+prob = ODEProblem(test, [], (0.0, end_time); guesses=[test.cell.Rp_c.i => -0.004364211122503292, test.cell.Im.i => 8.207600054307171])
+sol = solve(prob; dtmax=0.001, initializealg = SciMLBase.OverrideInit() )
 
 plot(sol[test.vref.V], sol[test.i.i], title="I-V")
 
 plot(sol, idxs=[test.cell.V.v])
-plot!(sol, idxs=[test.vref.V])
+plot(sol, idxs=[test.vref.V])
+plot(sol, idxs=[test.src.y])
+
+plot!(sol, idxs=[test.cell.Im.I])
 plot(sol, idxs=[test.cell.I.i])
-plot!(sol, idxs=[test.i.i])
+plot(sol, idxs=[test.i.i])
+
 plot(sol, idxs=[test.cell.T_reading])
 plot(sol, idxs=[test.cell.G])
-plot(sol, idxs=[test.temp.in_sunlight])
-plot(sol, idxs=[test.temp.sun_facing])
-
 plot(sol, idxs=[test.temp.T])
 plot(sol, idxs=[test.temp.G_eff])
 plot(sol, idxs=[test.temp.θ])
 
-plot(sol, idxs=[test.vref.V])
 plot(sol, idxs=[test.cell.rolloff])
 plot(sol, idxs=[test.cell.ipv])
-plot(sol, idxs=[test.cell.Im.I])
+
 
 @mtkmodel PVLoad begin
     @components begin 

@@ -5,7 +5,7 @@
 
 
 """
-   PVCell(; name, Rs, Rp, T, Gn, ipv_n, Ki, a, Ns, Vocn, Iscn, Kv, k, q)
+   PVCell(; name, Rs, Rp, T, Gn, ipv_n, Ki, ΔT, a, Ns, Vocn, Iscn, Kv, k, q)
 
 ## Parameters: 
 
@@ -17,7 +17,8 @@
 | `Gn`         |                          | --  |   1000 |
 | `ipv_n`         |                          | --  |   8.214 |
 | `Ki`         |                          | --  |   0.0032 |
-| `a`         | parameter ΔT::Real = 48.0                         | --  |   1.3 |
+| `ΔT`         |                          | --  |   -2 |
+| `a`         |                          | --  |   1.3 |
 | `Ns`         |                          | --  |   54 |
 | `Vocn`         |                          | --  |   32.9 |
 | `Iscn`         |                          | --  |   8.21 |
@@ -29,20 +30,19 @@
 
  * `p` - ([`Pin`](@ref))
  * `n` - ([`Pin`](@ref))
- * `T_reading` - This connector represents a real signal as an input to a component ([`RealInput`](@ref))
 
 ## Variables
 
 | Name         | Description                         | Units  | 
 | ------------ | ----------------------------------- | ------ | 
-| `G`         |                          | --  | 
-| `ΔT`         |                          | --  | 
+| `G`         | T_reading = RealInput()# G = RealInput()# variable ΔT::Real                         | --  | 
 | `ipv`         |                          | --  | 
 | `i0`         |                          | --  | 
 | `Vt`         |                          | --  | 
 | `rolloff`         |                          | --  | 
+| `over_v`         |                          | --  | 
 """
-@component function PVCell(; name, Rs=0.221, Rp=415.405, T=300.15, Gn=1000, ipv_n=8.214, Ki=0.0032, a=1.3, Ns=54, Vocn=32.9, Iscn=8.21, Kv=-0.123, k=1.380649e-23, q=1.602176634e-19)
+@component function PVCell(; name, Rs=0.221, Rp=415.405, T=300.15, Gn=1000, ipv_n=8.214, Ki=0.0032, ΔT=-2, a=1.3, Ns=54, Vocn=32.9, Iscn=8.21, Kv=-0.123, k=1.380649e-23, q=1.602176634e-19)
   params = @parameters begin
     (Rs::Float64 = Rs)
     (Rp::Float64 = Rp)
@@ -50,7 +50,8 @@
     (Gn::Float64 = Gn)
     (ipv_n::Float64 = ipv_n)
     (Ki::Float64 = Ki)
-    (a::Float64 = a), [description = "parameter ΔT::Real = 48.0"]
+    (ΔT::Float64 = ΔT)
+    (a::Float64 = a)
     (Ns::Float64 = Ns)
     (Vocn::Float64 = Vocn)
     (Iscn::Float64 = Iscn)
@@ -59,13 +60,12 @@
     (q::Float64 = q)
   end
   vars = @variables begin
-    T_reading(t), [input = true]
-    G(t)
-    ΔT(t)
+    G(t), [description = "T_reading = RealInput()# G = RealInput()# variable ΔT::Real"]
     ipv(t)
     i0(t)
     Vt(t)
     rolloff(t)
+    over_v(t)
   end
   systems = @named begin
     p = __JSML__Pin()
@@ -79,12 +79,13 @@
   defaults = Dict([
   ])
   eqs = Equation[
-    ΔT ~ T - T_reading
+    # ΔT = T - T_reading
     ipv ~ G / Gn * (ipv_n + Ki * ΔT)
     Vt ~ Ns * (T + ΔT) * k / q
     i0 ~ (Iscn + Ki * ΔT) / (exp((Vocn + Kv * ΔT) / (a * Vt)) - 1)
     rolloff ~ (exp((V.v + Rs * I.i) / (Vt * a)) - 1)
-    Im.I ~ ipv - i0 * rolloff
+    # Im.I = ifelse(V.v < 0, 0, ifelse(V.v > Vocn, 0, ipv - i0 * rolloff))# Im.I = ipv - i0 * rolloff# Im.I = ifelse(V.v > Vocn, 0, ipv - i0 * rolloff)# Im.I = 0
+    Im.I ~ ifelse(over_v > 0.5, 0, ipv - i0 * rolloff)
     connect(I.n, p)
     connect(V.n, Rp_c.n, Im.n, n)
     connect(Rs_c.n, V.p, I.p)
