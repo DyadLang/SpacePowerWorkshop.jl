@@ -11,6 +11,7 @@ RuntimeGeneratedFunctions.init(@__MODULE__)
 
 
 
+include("Capacitor_test.jl")
 include("CurrentSensor_test.jl")
 include("CurrentSource_test.jl")
 include("Ground_test.jl")

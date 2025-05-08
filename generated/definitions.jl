@@ -42,6 +42,7 @@ end
   return ODESystem(Equation[], t, vars, []; name)
 end
 
+include("Capacitor_definition.jl")
 include("CurrentSensor_definition.jl")
 include("CurrentSource_definition.jl")
 include("Ground_definition.jl")
