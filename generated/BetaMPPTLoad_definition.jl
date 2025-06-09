@@ -5,67 +5,64 @@
 
 
 """
-   MPPT(; name, startTime, samplePeriod, VmpRef, ImpRef, n)
+   BetaMPPTLoad(; name, β, q, K)
+
+A simple linear resistor model
 
 ## Parameters: 
 
 | Name         | Description                         | Units  |   Default value |
 | ------------ | ----------------------------------- | ------ | --------------- |
-| `startTime`         |                          | --  |   0 |
-| `samplePeriod`         |                          | --  |   1 |
-| `VmpRef`         |                          | --  |    |
-| `ImpRef`         |                          | --  |    |
-| `n`         |                          | --  |    |
+| `β`         |                          | --  |    |
+| `q`         | parameter σ::Real                         | --  |   1.602176634e-19 |
+| `K`         |                          | --  |   1.380649e-23 |
 
 ## Connectors
 
- * `power` - This connector represents a real signal as an input to a component ([`RealInput`](@ref))
- * `vRef` - This connector represents a real signal as an output from a component ([`RealOutput`](@ref))
+ * `p` - ([`Pin`](@ref))
+ * `n` - ([`Pin`](@ref))
+ * `T` - This connector represents a real signal as an input to a component ([`RealInput`](@ref))
+ * `Vt` - This connector represents a real signal as an input to a component ([`RealInput`](@ref))
 
 ## Variables
 
 | Name         | Description                         | Units  | 
 | ------------ | ----------------------------------- | ------ | 
-| `dv`         |                          | --  | 
-| `dpower`         |                          | --  | 
-| `firstTrigger`         |                          | --  | 
-| `sampleTrigger`         |                          | --  | 
-| `counter`         |                          | --  | 
-| `signv`         |                          | --  | 
+| `v`         |                          | V  | 
+| `i`         |                          | A  | 
+| `c`         | parameter N::Real                         | --  | 
 """
-@component function MPPT(; name, startTime=0, samplePeriod=1, VmpRef=nothing, ImpRef=nothing, n=nothing)
+@component function BetaMPPTLoad(; name, β=nothing, q=1.602176634e-19, K=1.380649e-23)
   params = @parameters begin
-    (startTime::Float64 = startTime)
-    (samplePeriod::Float64 = samplePeriod)
-    (VmpRef::Float64 = VmpRef)
-    (ImpRef::Float64 = ImpRef)
-    (n::Float64 = n)
+    (β::Float64 = β)
+    (q::Float64 = q), [description = "parameter σ::Real"]
+    (K::Float64 = K)
   end
   vars = @variables begin
-    power(t), [input = true]
-    vRef(t), [output = true]
-    dv(t)
-    dpower(t)
-    firstTrigger(t)
-    sampleTrigger(t)
-    counter(t)
-    signv(t)
+    T(t), [input = true]
+    Vt(t), [input = true]
+    v(t)
+    i(t)
+    c(t), [description = "parameter N::Real"]
+  end
+  systems = @named begin
+    p = __JSML__Pin()
+    n = __JSML__Pin()
   end
   defaults = Dict([
-    firstTrigger => (true),
-    counter => (1),
   ])
-  initialization_eqs = [
-    signv ~ -1
-  ]
   eqs = Equation[
-    dv ~ VmpRef / n
-    dpower ~ VmpRef * ImpRef / n
+    v ~ p.v - n.v
+    i ~ p.i
+    p.i + n.i ~ 0
+    log(max(i / v, 0.1)) - c * v ~ β
+    # c = q / (σ*K*T*N)
+    c ~ 1 / Vt
   ]
-  return ODESystem(eqs, t, vars, params; systems = [], defaults, name, initialization_eqs)
+  return ODESystem(eqs, t, vars, params; systems, defaults, name)
 end
-export MPPT
-Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(MPPT)) = print(io,
+export BetaMPPTLoad
+Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(BetaMPPTLoad)) = print(io,
   """<div style="height: 100%; width: 100%; background-color: white"><div style="margin: auto; height: 500px; width: 500px; padding: 200px"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000"
     overflow="visible" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
       <defs>

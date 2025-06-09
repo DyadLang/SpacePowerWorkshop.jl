@@ -31,6 +31,7 @@
  * `n` - ([`Pin`](@ref))
  * `T_reading` - This connector represents a real signal as an input to a component ([`RealInput`](@ref))
  * `G` - This connector represents a real signal as an input to a component ([`RealInput`](@ref))
+ * `Vt` - This connector represents a real signal as an output from a component ([`RealOutput`](@ref))
 
 ## Variables
 
@@ -39,8 +40,7 @@
 | `ΔT`         |                          | --  | 
 | `ipv`         | variable G::Real                         | --  | 
 | `i0`         |                          | --  | 
-| `Vt`         |                          | --  | 
-| `rolloff`         |                          | --  | 
+| `rolloff`         | variable Vt::Real                         | --  | 
 | `over_v`         |                          | --  | 
 """
 @component function PVCell(; name, Rs=0.221, Rp=415.405, T=300.15, Gn=1000, ipv_n=8.214, Ki=0.0032, a=1.3, Ns=54, Vocn=32.9, Iscn=8.21, Kv=-0.123, k=1.380649e-23, q=1.602176634e-19)
@@ -62,11 +62,11 @@
   vars = @variables begin
     T_reading(t), [input = true]
     G(t), [input = true]
+    Vt(t), [output = true]
     ΔT(t)
     ipv(t), [description = "variable G::Real"]
     i0(t)
-    Vt(t)
-    rolloff(t)
+    rolloff(t), [description = "variable Vt::Real"]
     over_v(t)
   end
   systems = @named begin
@@ -84,8 +84,9 @@
     Vt ~ Ns * (T + ΔT) * k / q
     i0 ~ (Iscn + Ki * ΔT) / (exp((Vocn + Kv * ΔT) / (a * Vt)) - 1)
     rolloff ~ (exp((V.v + Rs * Im.i) / (Vt * a)) - 1)
-    # Im.I = ifelse(V.v < 0, 0, ifelse(V.v > Vocn, 0, ipv - i0 * rolloff))# Im.I = ipv - i0 * rolloff# Im.I = ifelse(V.v > Vocn, 0, ipv - i0 * rolloff)# Im.I = 0
-    Im.I ~ ifelse(over_v > 0.5, 0, max(ipv - i0 * rolloff - (V.v + Rs * Im.I) / Rp, 0))
+    # Im.I = ifelse(V.v < 0, 0, ifelse(V.v > Vocn, 0, ipv - i0 * rolloff))# Im.I = ipv - i0 * rolloff# Im.I = ifelse(V.v > Vocn, 0, ipv - i0 * rolloff)# Im.I = 0# Im.I = ifelse(over_v > 0.5, 0, max(ipv - i0 * rolloff - (V.v + Rs*Im.I)/Rp, 0))
+    Im.I ~ max(ipv - i0 * rolloff - (V.v + Rs * Im.I) / Rp, 0) * (1 - over_v)
+    over_v ~ (tanh(2 * (V.v - Vocn)) + 1) / 2
     # connect(I.n, p)
     connect(Im.n, p)
     connect(V.n, Im.p, n)

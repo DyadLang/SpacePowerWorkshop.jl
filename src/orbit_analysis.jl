@@ -107,3 +107,4 @@ plot(sol.t[1:43200], sol[temp.θ][1:43200])
 plot(sol.t[1:43200], sol[temp.in_sunlight][1:43200])
 plot(sol.t[1:43200], sol[temp.sun_facing][1:43200])
 =#
+

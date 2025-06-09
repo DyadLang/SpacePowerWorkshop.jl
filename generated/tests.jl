@@ -11,12 +11,13 @@ RuntimeGeneratedFunctions.init(@__MODULE__)
 
 
 
+include("BetaMPPTLoad_test.jl")
 include("Capacitor_test.jl")
 include("CurrentSensor_test.jl")
 include("CurrentSource_test.jl")
 include("Ground_test.jl")
 include("Hello_test.jl")
-include("MPPT_test.jl")
+include("MPPT_old_test.jl")
 include("PVArray_test.jl")
 include("PVArrayVerification_test.jl")
 include("PVCell_test.jl")

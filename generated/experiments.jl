@@ -5,12 +5,13 @@
 ### Instead, update the JSML source code and regenerate this file
 
 
+include("BetaMPPTLoad_experiment.jl")
 include("Capacitor_experiment.jl")
 include("CurrentSensor_experiment.jl")
 include("CurrentSource_experiment.jl")
 include("Ground_experiment.jl")
 include("Hello_experiment.jl")
-include("MPPT_experiment.jl")
+include("MPPT_old_experiment.jl")
 include("PVArray_experiment.jl")
 include("PVArrayVerification_experiment.jl")
 include("PVCell_experiment.jl")

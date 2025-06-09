@@ -1,0 +1,20 @@
+# A simple linear resistor model
+component BetaMPPTLoad
+  extends TwoPin
+
+  parameter β::Real
+  # parameter σ::Real
+  parameter q::Real = 1.602176634e-19
+  parameter K::Real = 1.380649e-23
+  # parameter N::Real
+
+  variable c::Real
+
+  T = RealInput()
+  Vt = RealInput()
+relations
+  log(max(i/v, 0.1)) - c * v = β
+  # c = q / (σ*K*T*N) 
+  c = 1 / Vt
+
+end

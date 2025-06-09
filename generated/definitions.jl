@@ -42,12 +42,13 @@ end
   return ODESystem(Equation[], t, vars, []; name)
 end
 
+include("BetaMPPTLoad_definition.jl")
 include("Capacitor_definition.jl")
 include("CurrentSensor_definition.jl")
 include("CurrentSource_definition.jl")
 include("Ground_definition.jl")
 include("Hello_definition.jl")
-include("MPPT_definition.jl")
+include("MPPT_old_definition.jl")
 include("PVArray_definition.jl")
 include("PVArrayVerification_definition.jl")
 include("PVCell_definition.jl")

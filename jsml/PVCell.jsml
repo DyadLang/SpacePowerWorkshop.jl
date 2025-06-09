@@ -30,10 +30,11 @@ component PVCell
     # variable G::Real
     variable ipv::Real
     variable i0::Real
-    variable Vt::Real
+    # variable Vt::Real
     variable rolloff::Real
     variable over_v::Real
     
+    Vt = RealOutput()
 
 relations
     # connect(I.n, p)
@@ -54,6 +55,7 @@ relations
     # Im.I = ipv - i0 * rolloff
     # Im.I = ifelse(V.v > Vocn, 0, ipv - i0 * rolloff)
     # Im.I = 0
-    Im.I = ifelse(over_v > 0.5, 0, max(ipv - i0 * rolloff - (V.v + Rs*Im.I)/Rp, 0))
-
+    # Im.I = ifelse(over_v > 0.5, 0, max(ipv - i0 * rolloff - (V.v + Rs*Im.I)/Rp, 0))
+    Im.I = max(ipv - i0 * rolloff - (V.v + Rs*Im.I)/Rp, 0)*(1 - over_v)
+    over_v = (tanh(2*(V.v - Vocn)) + 1) / 2
 end

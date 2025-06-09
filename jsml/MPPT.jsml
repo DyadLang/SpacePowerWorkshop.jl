@@ -1,4 +1,4 @@
-component MPPT 
+component MPPT_old 
     variable dv::Real
     variable dpower::Real
     variable firstTrigger::Boolean
