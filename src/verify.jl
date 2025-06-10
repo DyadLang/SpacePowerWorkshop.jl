@@ -218,11 +218,8 @@ sol = solve(prob; dtmax=0.01)
     
     @components begin 
         cell = PVCell() # determines the voltage draw
-        # vref = VoltageSource()
-        # res = Resistor(R=2)
         res = BetaMPPTLoad() # determines the current draw given the voltage draw
         i = CurrentSensor()
-        # src = BlockComponents.Ramp(;start_time=0, offset=0, height=35, duration=10)
         ground = Ground()
         
         temp = TempSensor()
@@ -233,31 +230,14 @@ sol = solve(prob; dtmax=0.01)
         connect(cell.p, i.n)
         connect(i.p, res.p)
         connect(cell.Vt, res.Vt)
-        # vref.V ~ src.y
-        # vref.V ~ t*35/10
-
-        # cell.G ~ max(1000*sin(2*pi*t/10), 0)
-        # cell.T_reading ~ 25*sin(2*pi*t/2) + 323
 
         cell.G ~ temp.G_eff
         cell.T_reading ~ max(temp.T, 125)
     end
-    # @continuous_events begin
-    #     ModelingToolkit.SymbolicContinuousCallback(;eqs=[cell.V.v ~ cell.Vocn + 0.1], affect=ModelingToolkit.ImperativeAffect(modified=(;over_v, i = cell.Im.I), observed=(;v = cell.V.v, Vocn = cell.Vocn)) do m,o,c,i 
-    #         @show o i.t
-    #         return (;over_v = o.v >= o.Vocn ? 1.0 : 0.0)
-    #     end, affect_neg=Equation[], reinitializealg=OrdinaryDiffEq.BrownFullBasicInit())
-
-    #     ModelingToolkit.SymbolicContinuousCallback(;eqs=[cell.V.v ~ cell.Vocn], affect=Equation[], affect_neg=ModelingToolkit.ImperativeAffect(modified=(;over_v, i = cell.Im.I), observed=(;v = cell.V.v, Vocn = cell.Vocn)) do m,o,c,i 
-    #         @show o i.t
-    #         return (;over_v = 0)
-    #     end, reinitializealg=OrdinaryDiffEq.BrownFullBasicInit())
-    # end
 end
 
 @mtkbuild cell = MPPTCell()
-prob2 = ODEProblem(cell, [cell.res.β => -28], (0.0, end_time); guesses=[cell.cell.Im.i => 8.207600054307171, cell.res.v => 1])
-# prob2 = ODEProblem(cell, [], (0.0, end_time); guesses=[cell.cell.Im.i => 8.207600054307171, cell.res.v => 1])
+prob2 = ODEProblem(cell, [cell.res.β => -28, cell.res.stored_energy => 1], (0.0, end_time); guesses=[cell.cell.Im.i => 8.207600054307171, cell.res.v => 1])
 sol2 = solve(prob2; dtmax=0.001)
 
 
@@ -269,6 +249,14 @@ plot(sol2, idxs=[cell.cell.Im.I])
 plot(sol2, idxs=[cell.cell.V.v])
 plot(sol2, idxs=[cell.cell.Im.I * cell.cell.V.v], title="Power")
 plot(sol2.t[1:63], sol2[cell.cell.Im.I][1:63] .* sol2[cell.cell.V.v][1:63])
+
+plot(sol2, idxs=[cell.res.stored_energy])
+plot(sol2.t[1:1000], sol2[cell.res.stored_energy][1:1000], title="stored_energy")
+plot!(sol2.t[1:1000], sol2[cell.cell.Im.I * cell.cell.V.v][1:1000], label="solar panel power")
+
+plot(sol2, idxs=[cell.cell.Im.I * cell.cell.V.v - cell.res.hotel_load], title="Power - Hotel")
+plot(sol2.t[1:1000], sol2[cell.cell.Im.I * cell.cell.V.v - cell.res.hotel_load][1:1000], title="Power - Hotel")
+plot(sol2.t[1:1000], sol2[cell.res.charge_power][1:1000], title="charge power", label = "charge power")
 
 # Day 1 data
 plot(sol2.t[1:1016], sol2[cell.cell.T_reading][1:1016])

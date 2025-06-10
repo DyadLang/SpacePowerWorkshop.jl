@@ -5,9 +5,9 @@
 
 
 """
-   BetaMPPTLoad(; name, β, q, K)
+   BetaMPPTLoad(; name, β, q, K, hotel_load, capacity, power_rate)
 
-A simple linear resistor model
+A simple linear resistor model maybe name = MPPT Power Supply
 
 ## Parameters: 
 
@@ -16,6 +16,9 @@ A simple linear resistor model
 | `β`         |                          | --  |    |
 | `q`         | parameter σ::Real                         | --  |   1.602176634e-19 |
 | `K`         |                          | --  |   1.380649e-23 |
+| `hotel_load`         |                          | --  |   50 |
+| `capacity`         |                          | --  |   4 |
+| `power_rate`         |                          | --  |   300 |
 
 ## Connectors
 
@@ -31,12 +34,17 @@ A simple linear resistor model
 | `v`         |                          | V  | 
 | `i`         |                          | A  | 
 | `c`         | parameter N::Real                         | --  | 
+| `stored_energy`         |                          | --  | 
+| `charge_power`         |                          | --  | 
 """
-@component function BetaMPPTLoad(; name, β=nothing, q=1.602176634e-19, K=1.380649e-23)
+@component function BetaMPPTLoad(; name, β=nothing, q=1.602176634e-19, K=1.380649e-23, hotel_load=50, capacity=4, power_rate=300)
   params = @parameters begin
     (β::Float64 = β)
     (q::Float64 = q), [description = "parameter σ::Real"]
     (K::Float64 = K)
+    (hotel_load::Float64 = hotel_load)
+    (capacity::Float64 = capacity)
+    (power_rate::Float64 = power_rate)
   end
   vars = @variables begin
     T(t), [input = true]
@@ -44,6 +52,8 @@ A simple linear resistor model
     v(t)
     i(t)
     c(t), [description = "parameter N::Real"]
+    stored_energy(t)
+    charge_power(t)
   end
   systems = @named begin
     p = __JSML__Pin()
@@ -58,6 +68,8 @@ A simple linear resistor model
     log(max(i / v, 0.1)) - c * v ~ β
     # c = q / (σ*K*T*N)
     c ~ 1 / Vt
+    D(stored_energy) ~ charge_power
+    charge_power ~ min(max(i * v - hotel_load, -power_rate * (tanh(10 * (stored_energy - 0.2)) + 1) / 2), power_rate * (tanh(10 * (-stored_energy + capacity)) + 1) / 2)
   ]
   return ODESystem(eqs, t, vars, params; systems, defaults, name)
 end
