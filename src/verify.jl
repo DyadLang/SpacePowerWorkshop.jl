@@ -251,7 +251,7 @@ plot(sol2, idxs=[cell.cell.Im.I * cell.cell.V.v], title="Power")
 plot(sol2.t[1:63], sol2[cell.cell.Im.I][1:63] .* sol2[cell.cell.V.v][1:63])
 
 plot(sol2, idxs=[cell.res.stored_energy])
-plot(sol2.t[1:1000], sol2[cell.res.stored_energy][1:1000], title="stored_energy")
+plot(sol2.t[1:1000], sol2[cell.res.stored_energy][1:1000], label="stored_energy")
 plot!(sol2.t[1:1000], sol2[cell.cell.Im.I * cell.cell.V.v][1:1000], label="solar panel power")
 
 plot(sol2, idxs=[cell.cell.Im.I * cell.cell.V.v - cell.res.hotel_load], title="Power - Hotel")

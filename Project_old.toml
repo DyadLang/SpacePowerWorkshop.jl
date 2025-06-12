@@ -1,0 +1,41 @@
+name = "Example1"
+uuid = "8adc5bc7-bed0-441f-923d-58852504aaf1"
+authors = [" <>"]
+version = "0.1.0"
+
+[deps]
+BlockComponents = "1ef5d832-be8e-447f-9f2c-8b5d17d15fd3"
+DataInterpolations = "82cc6244-b520-54b8-b5a6-8a565e85f1d0"
+DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
+JuliaSimCore = "3626b584-163a-47fb-a24f-7c5de6062d4a"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+ModelingToolkit = "961ee093-0014-501f-94e3-6117800e7a78"
+ModelingToolkitStandardLibrary = "16a59e39-deab-5bd0-87e4-056b12336739"
+OrdinaryDiffEqDefault = "50262376-6c5a-4cf5-baba-aaf4f84d72d7"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+PrecompileTools = "aea7be01-6a6a-4083-8856-8a6e6704d82a"
+Roots = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
+RuntimeGeneratedFunctions = "7e49a35a-f44a-4d26-94aa-eba1b4ca6b47"
+SatelliteAnalysis = "101040f3-2a13-4d8c-b9b0-4a720fa906ce"
+SatelliteToolbox = "6ac157d9-b43d-51bb-8fab-48bf53814f4a"
+SciMLBase = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
+
+[compat]
+DataInterpolations = "7.2.0"
+DifferentialEquations = "7.16.1"
+LinearAlgebra = "1.11.0"
+ModelingToolkit = "9.72.0"
+Plots = "1.40.12"
+Roots = "2.2.7"
+SatelliteAnalysis = "0.3.8"
+SatelliteToolbox = "1.0.0"
+SciMLBase = "2.86.2"
+
+[extras]
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["CSV", "Plots", "DataFrames", "Test"]

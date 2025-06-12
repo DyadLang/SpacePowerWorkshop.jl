@@ -1,0 +1,25 @@
+component MPPT_old 
+    variable dv::Real
+    variable dpower::Real
+    variable firstTrigger::Boolean
+    variable sampleTrigger::Boolean
+    variable counter::Integer
+    variable signv::Real
+    
+    parameter startTime::Real = 0
+    parameter samplePeriod::Real = 1
+    parameter VmpRef::Real 
+    parameter ImpRef::Real 
+    parameter n::Real
+
+    power = RealInput()
+    vRef = RealOutput()
+    
+relations
+    initial firstTrigger = true
+    initial counter = 1
+    initial signv = -1
+
+    dv = VmpRef / n
+    dpower = VmpRef * ImpRef / n
+end
