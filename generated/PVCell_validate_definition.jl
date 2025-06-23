@@ -5,7 +5,7 @@
 
 
 @doc Markdown.doc"""
-   PVCell(; name, Rs, Rp, T, Gn, ipv_n, Ki, a, Ns, Vocn, Iscn, Kv, k, q)
+   PVCell_validate(; name, Rs, Rp, T, Gn, G, ipv_n, Ki, ΔT, a, Ns, Vocn, Iscn, Kv, k, q)
 
 ## Parameters: 
 
@@ -15,8 +15,10 @@
 | `Rp`         |                          | --  |   415.405 |
 | `T`         |                          | --  |   300.15 |
 | `Gn`         |                          | --  |   1000 |
+| `G`         |                          | --  |   1000 |
 | `ipv_n`         |                          | --  |   8.214 |
 | `Ki`         |                          | --  |   0.0032 |
+| `ΔT`         |                          | --  |   23 |
 | `a`         |                          | --  |   1.3 |
 | `Ns`         |                          | --  |   54 |
 | `Vocn`         |                          | --  |   32.9 |
@@ -29,21 +31,18 @@
 
  * `p` - This connector represents an electrical pin with voltage and current as the potential and flow variables, respectively. ([`Pin`](@ref))
  * `n` - This connector represents an electrical pin with voltage and current as the potential and flow variables, respectively. ([`Pin`](@ref))
- * `T_reading` - This connector represents a real signal as an input to a component ([`RealInput`](@ref))
- * `G` - This connector represents a real signal as an input to a component ([`RealInput`](@ref))
  * `Vt` - This connector represents a real signal as an output from a component ([`RealOutput`](@ref))
 
 ## Variables
 
 | Name         | Description                         | Units  | 
 | ------------ | ----------------------------------- | ------ | 
-| `ΔT`         |                          | --  | 
-| `ipv`         |                          | --  | 
+| `ipv`         | T_reading = RealInput()# G = RealInput()# variable ΔT::Real# variable G::Real                         | --  | 
 | `i0`         |                          | --  | 
-| `rolloff`         |                          | --  | 
+| `rolloff`         | variable Vt::Real                         | --  | 
 | `over_v`         |                          | --  | 
 """
-@component function PVCell(; name, Rs=0.221, Rp=415.405, T=300.15, Gn=1000, ipv_n=8.214, Ki=0.0032, a=1.3, Ns=54, Vocn=32.9, Iscn=8.21, Kv=-0.123, k=1.380649e-23, q=1.602176634e-19)
+@component function PVCell_validate(; name, Rs=0.221, Rp=415.405, T=300.15, Gn=1000, G=1000, ipv_n=8.214, Ki=0.0032, ΔT=23, a=1.3, Ns=54, Vocn=32.9, Iscn=8.21, Kv=-0.123, k=1.380649e-23, q=1.602176634e-19)
 
   ### Symbolic Parameters
   __params = Any[]
@@ -51,8 +50,10 @@
   append!(__params, @parameters (Rp::Float64 = Rp))
   append!(__params, @parameters (T::Float64 = T))
   append!(__params, @parameters (Gn::Float64 = Gn))
+  append!(__params, @parameters (G::Float64 = G))
   append!(__params, @parameters (ipv_n::Float64 = ipv_n))
   append!(__params, @parameters (Ki::Float64 = Ki))
+  append!(__params, @parameters (ΔT::Float64 = ΔT))
   append!(__params, @parameters (a::Float64 = a))
   append!(__params, @parameters (Ns::Float64 = Ns))
   append!(__params, @parameters (Vocn::Float64 = Vocn))
@@ -63,13 +64,10 @@
 
   ### Variables
   __vars = Any[]
-  append!(__vars, @variables T_reading(t), [input = true])
-  append!(__vars, @variables G(t), [input = true])
   append!(__vars, @variables Vt(t), [output = true])
-  append!(__vars, @variables (ΔT(t)))
-  append!(__vars, @variables (ipv(t)))
+  append!(__vars, @variables (ipv(t)), [description = "T_reading = RealInput()# G = RealInput()# variable ΔT::Real# variable G::Real"])
   append!(__vars, @variables (i0(t)))
-  append!(__vars, @variables (rolloff(t)))
+  append!(__vars, @variables (rolloff(t)), [description = "variable Vt::Real"])
   append!(__vars, @variables (over_v(t)))
 
   ### Constants
@@ -90,13 +88,15 @@
 
   ### Equations
   __eqs = Equation[]
-  push!(__eqs, ΔT ~ T - T_reading)
+  # connect(V.n, Rp_c.n, Im.n, n)# connect(Rs_c.n, V.p, I.p)# connect(Im.p, Rp_c.p, Rs_c.p)# ΔT = T - T_reading
   push!(__eqs, ipv ~ G / Gn * (ipv_n + Ki * ΔT))
   push!(__eqs, Vt ~ Ns * (T + ΔT) * k / q)
   push!(__eqs, i0 ~ (Iscn + Ki * ΔT) / (exp((Vocn + Kv * ΔT) / (a * Vt)) - 1))
   push!(__eqs, rolloff ~ (exp((V.v + Rs * Im.i) / (Vt * a)) - 1))
+  # Im.I = ifelse(V.v < 0, 0, ifelse(V.v > Vocn, 0, ipv - i0 * rolloff))# Im.I = ipv - i0 * rolloff# Im.I = ifelse(V.v > Vocn, 0, ipv - i0 * rolloff)# Im.I = 0# Im.I = ifelse(over_v > 0.5, 0, max(ipv - i0 * rolloff - (V.v + Rs*Im.I)/Rp, 0))
   push!(__eqs, Im.I ~ max(ipv - i0 * rolloff - (V.v + Rs * Im.I) / Rp, 0) * (1 - over_v))
   push!(__eqs, over_v ~ (tanh(2 * (V.v - Vocn)) + 1) / 2)
+  # connect(I.n, p)
   push!(__eqs, connect(Im.n, p))
   push!(__eqs, connect(V.n, Im.p, n))
   push!(__eqs, connect(V.p, Im.n))
@@ -104,9 +104,9 @@
   # Return completely constructed ODESystem
   return ODESystem(__eqs, t, __vars, __params; systems=__systems, defaults=__defaults, name, initialization_eqs=__initialization_eqs)
 end
-export PVCell
+export PVCell_validate
 
-Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(PVCell)) = print(io,
+Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(PVCell_validate)) = print(io,
   """<div style="height: 100%; width: 100%; background-color: white"><div style="margin: auto; height: 500px; width: 500px; padding: 200px"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000"
     overflow="visible" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
       <defs>

@@ -4,7 +4,7 @@
 ### Instead, update the Dyad source code and regenerate this file
 
 
-"""
+@doc Markdown.doc"""
    BetaMPPTLoad(; name, β, q, K, hotel_load, capacity, power_rate)
 
 A simple linear resistor model maybe name = MPPT Power Supply
@@ -14,7 +14,7 @@ A simple linear resistor model maybe name = MPPT Power Supply
 | Name         | Description                         | Units  |   Default value |
 | ------------ | ----------------------------------- | ------ | --------------- |
 | `β`         |                          | --  |    |
-| `q`         | parameter σ::Real                         | --  |   1.602176634e-19 |
+| `q`         |                          | --  |   1.602176634e-19 |
 | `K`         |                          | --  |   1.380649e-23 |
 | `hotel_load`         |                          | --  |   50 |
 | `capacity`         |                          | --  |   4 |
@@ -22,8 +22,8 @@ A simple linear resistor model maybe name = MPPT Power Supply
 
 ## Connectors
 
- * `p` - ([`Pin`](@ref))
- * `n` - ([`Pin`](@ref))
+ * `p` - This connector represents an electrical pin with voltage and current as the potential and flow variables, respectively. ([`Pin`](@ref))
+ * `n` - This connector represents an electrical pin with voltage and current as the potential and flow variables, respectively. ([`Pin`](@ref))
  * `T` - This connector represents a real signal as an input to a component ([`RealInput`](@ref))
  * `Vt` - This connector represents a real signal as an input to a component ([`RealInput`](@ref))
 
@@ -33,7 +33,7 @@ A simple linear resistor model maybe name = MPPT Power Supply
 | ------------ | ----------------------------------- | ------ | 
 | `v`         |                          | V  | 
 | `i`         |                          | A  | 
-| `c`         | parameter N::Real                         | --  | 
+| `c`         |                          | --  | 
 | `stored_energy`         |                          | --  | 
 | `charge_power`         |                          | --  | 
 """
@@ -42,7 +42,7 @@ A simple linear resistor model maybe name = MPPT Power Supply
   ### Symbolic Parameters
   __params = Any[]
   append!(__params, @parameters (β::Float64 = β))
-  append!(__params, @parameters (q::Float64 = q), [description = "parameter σ::Real"])
+  append!(__params, @parameters (q::Float64 = q))
   append!(__params, @parameters (K::Float64 = K))
   append!(__params, @parameters (hotel_load::Float64 = hotel_load))
   append!(__params, @parameters (capacity::Float64 = capacity))
@@ -54,7 +54,7 @@ A simple linear resistor model maybe name = MPPT Power Supply
   append!(__vars, @variables Vt(t), [input = true])
   append!(__vars, @variables (v(t)))
   append!(__vars, @variables (i(t)))
-  append!(__vars, @variables (c(t)), [description = "parameter N::Real"])
+  append!(__vars, @variables (c(t)))
   append!(__vars, @variables (stored_energy(t)))
   append!(__vars, @variables (charge_power(t)))
 
@@ -78,7 +78,6 @@ A simple linear resistor model maybe name = MPPT Power Supply
   push!(__eqs, i ~ p.i)
   push!(__eqs, p.i + n.i ~ 0)
   push!(__eqs, log(max(i / v, 0.1)) - c * v ~ β)
-  # c = q / (σ*K*T*N)
   push!(__eqs, c ~ 1 / Vt)
   push!(__eqs, D(stored_energy) ~ charge_power)
   push!(__eqs, charge_power ~ min(max(i * v - hotel_load, -power_rate * (tanh(10 * (stored_energy - 0.2)) + 1) / 2), power_rate * (tanh(10 * (-stored_energy + capacity)) + 1) / 2))
@@ -97,5 +96,14 @@ Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(BetaMPPTLoad)) = print(io,
         <filter id='blue-shadow' color-interpolation-filters="sRGB"><feDropShadow dx="0" dy="0" stdDeviation="100" flood-color="#0000ff" flood-opacity="0.5"/></filter>
         <filter id='drop-shadow' color-interpolation-filters="sRGB"><feDropShadow dx="0" dy="0" stdDeviation="40" flood-opacity="0.5"/></filter>
       </defs>
-    
+    <g  transform="translate(-500 0) scale(0.1 0.1) rotate(0)" transform-origin="center center"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000"
+  shape-rendering="geometricPrecision" text-rendering="geometricPrecision" transform-origin="center center">
+  <rect rx="0" ry="0" width="1000" height="1000" fill="blue" stroke="blue" stroke-width="3"
+      vector-effect="non-scaling-stroke"></rect>
+</svg></g>
+<g  transform="translate(500 0) scale(0.1 0.1) rotate(0)" transform-origin="center center"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000"
+  shape-rendering="geometricPrecision" text-rendering="geometricPrecision" transform-origin="center center">
+  <rect rx="0" ry="0" width="1000" height="1000" fill="#d2dbed" stroke="blue" stroke-width="3"
+      vector-effect="non-scaling-stroke"></rect>
+</svg></g>
       </svg></div></div>""")

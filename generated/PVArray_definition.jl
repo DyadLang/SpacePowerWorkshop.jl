@@ -4,7 +4,7 @@
 ### Instead, update the Dyad source code and regenerate this file
 
 
-"""
+@doc Markdown.doc"""
    PVArray(; name, q, Gn, Tn, Imp, Vmp, Iscn, Vocn, Kv, Ki, Ns, Np, Rs, Rp, a, Ipvn, k, α1, ϵ, σ, T_min, G_min)
 
 ## Parameters: 
@@ -35,8 +35,8 @@
 
 ## Connectors
 
- * `p` - ([`Pin`](@ref))
- * `n` - ([`Pin`](@ref))
+ * `p` - This connector represents an electrical pin with voltage and current as the potential and flow variables, respectively. ([`Pin`](@ref))
+ * `n` - This connector represents an electrical pin with voltage and current as the potential and flow variables, respectively. ([`Pin`](@ref))
  * `T` - This connector represents a real signal as an input to a component ([`RealInput`](@ref))
  * `G` - This connector represents a real signal as an input to a component ([`RealInput`](@ref))
 
@@ -135,5 +135,14 @@ Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(PVArray)) = print(io,
         <filter id='blue-shadow' color-interpolation-filters="sRGB"><feDropShadow dx="0" dy="0" stdDeviation="100" flood-color="#0000ff" flood-opacity="0.5"/></filter>
         <filter id='drop-shadow' color-interpolation-filters="sRGB"><feDropShadow dx="0" dy="0" stdDeviation="40" flood-opacity="0.5"/></filter>
       </defs>
-    
+    <g  transform="translate(-500 0) scale(0.1 0.1) rotate(0)" transform-origin="center center"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000"
+  shape-rendering="geometricPrecision" text-rendering="geometricPrecision" transform-origin="center center">
+  <rect rx="0" ry="0" width="1000" height="1000" fill="blue" stroke="blue" stroke-width="3"
+      vector-effect="non-scaling-stroke"></rect>
+</svg></g>
+<g  transform="translate(500 0) scale(0.1 0.1) rotate(0)" transform-origin="center center"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000"
+  shape-rendering="geometricPrecision" text-rendering="geometricPrecision" transform-origin="center center">
+  <rect rx="0" ry="0" width="1000" height="1000" fill="#d2dbed" stroke="blue" stroke-width="3"
+      vector-effect="non-scaling-stroke"></rect>
+</svg></g>
       </svg></div></div>""")

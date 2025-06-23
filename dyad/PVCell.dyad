@@ -6,7 +6,55 @@ component PVCell
     parameter Gn::Real = 1000
     parameter ipv_n::Real = 8.214
     parameter Ki::Real = 0.0032
-    # parameter ΔT::Real = 23
+    parameter a::Real = 1.3
+    parameter Ns::Real = 54
+    parameter Vocn::Real=32.9
+    parameter Iscn::Real=8.21
+    parameter Kv::Real = -0.123
+    parameter k::Real = 1.380649e-23
+    parameter q::Real = 1.602176634e-19
+
+    p = Pin()
+    n = Pin()
+    V = ElectricalComponents.VoltageSensor()
+    Im = ElectricalComponents.CurrentSource()
+
+    T_reading = RealInput()
+    G = RealInput()
+    variable ΔT::Real
+
+    variable ipv::Real
+    variable i0::Real
+    variable rolloff::Real
+    variable over_v::Real
+    
+    Vt = RealOutput()
+ 
+relations
+    connect(Im.n, p)
+    connect(V.n, Im.p, n)
+    connect(V.p, Im.n)
+
+    ΔT = T - T_reading
+    ipv = G/Gn * (ipv_n + Ki * ΔT)
+    Vt = Ns * (T + ΔT) * k/q
+    i0 = (Iscn + Ki * ΔT)/(exp((Vocn + Kv * ΔT)/(a*Vt)) - 1)
+    rolloff = (exp((V.v + Rs * Im.i) / (Vt * a)) - 1)
+
+    Im.I = max(ipv - i0 * rolloff - (V.v + Rs*Im.I)/Rp, 0)*(1 - over_v)
+    over_v = (tanh(2*(V.v - Vocn)) + 1) / 2
+end
+
+component PVCell_validate 
+
+    parameter Rs::Real=0.221
+    parameter Rp::Real=415.405
+    parameter T::Real = 300.15
+    parameter Gn::Real = 1000
+    parameter G::Real = 1000
+    parameter ipv_n::Real = 8.214
+    parameter Ki::Real = 0.0032
+    parameter ΔT::Real = 23
     parameter a::Real = 1.3
     parameter Ns::Real = 54
     parameter Vocn::Real=32.9
@@ -18,14 +66,14 @@ component PVCell
     p = Pin()
     n = Pin()
     # I = CurrentSensor()
-    V = VoltageSensor()
+    V = ElectricalComponents.VoltageSensor()
     # Rs_c = Resistor(R=Rs)
     # Rp_c = Resistor(R=Rp)
-    Im = CurrentSource()
+    Im = ElectricalComponents.CurrentSource()
 
-    T_reading = RealInput()
-    G = RealInput()
-    variable ΔT::Real
+    # T_reading = RealInput()
+    # G = RealInput()
+    # variable ΔT::Real
 
     # variable G::Real
     variable ipv::Real
@@ -45,7 +93,7 @@ relations
     # connect(Rs_c.n, V.p, I.p)
     # connect(Im.p, Rp_c.p, Rs_c.p)
 
-    ΔT = T - T_reading
+    # ΔT = T - T_reading
     ipv = G/Gn * (ipv_n + Ki * ΔT)
     Vt = Ns * (T + ΔT) * k/q
     i0 = (Iscn + Ki * ΔT)/(exp((Vocn + Kv * ΔT)/(a*Vt)) - 1)

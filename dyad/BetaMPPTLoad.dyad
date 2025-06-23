@@ -1,26 +1,22 @@
 # A simple linear resistor model maybe name = MPPT Power Supply
 component BetaMPPTLoad
-  extends TwoPin
+  extends ElectricalComponents.OnePort
 
   parameter β::Real
-  # parameter σ::Real
   parameter q::Real = 1.602176634e-19
   parameter K::Real = 1.380649e-23
   parameter hotel_load::Real = 50
   parameter capacity::Real = 4
   parameter power_rate::Real = 300
-  # parameter N::Real
 
   variable c::Real
   variable stored_energy::Real
   variable charge_power::Real
 
-
   T = RealInput()
   Vt = RealInput()
 relations
   log(max(i/v, 0.1)) - c * v = β
-  # c = q / (σ*K*T*N) 
   c = 1 / Vt
 
   der(stored_energy) = charge_power

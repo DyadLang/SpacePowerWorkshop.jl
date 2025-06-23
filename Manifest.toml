@@ -2,7 +2,7 @@
 
 julia_version = "1.11.5"
 manifest_format = "2.0"
-project_hash = "b18acd3168039fb25338dbc6b93a9558ba37ddab"
+project_hash = "a5c9bb7b8428264eb3b67c449e29b1ea12401658"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "e2478490447631aedba0823d4d7a80b2cc8cdb32"
@@ -926,6 +926,12 @@ version = "1.8.0"
     Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
     ScientificTypes = "321657f4-b219-11e9-178b-2701a2544e81"
     Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
+
+[[deps.ElectricalComponents]]
+deps = ["BlockComponents", "CSV", "DyadEcosystemDependencies", "DyadInterface", "ModelingToolkit", "OrdinaryDiffEqDefault", "PrecompileTools", "RotationalComponents", "RuntimeGeneratedFunctions"]
+git-tree-sha1 = "f672f4ea8993b395dba53ddb6787d9e4e94feac8"
+uuid = "3fc4c519-469d-4ff5-98c9-d4d06b1514a2"
+version = "0.17.0"
 
 [[deps.EnumX]]
 git-tree-sha1 = "bddad79635af6aec424f53ed8aad5d7555dc6f00"
@@ -2362,6 +2368,12 @@ deps = ["Artifacts", "JLLWrappers", "Libdl"]
 git-tree-sha1 = "58cdd8fb2201a6267e1db87ff148dd6c1dbd8ad8"
 uuid = "f50d1b31-88e8-58de-be2c-1cc44531875f"
 version = "0.5.1+0"
+
+[[deps.RotationalComponents]]
+deps = ["BlockComponents", "DyadEcosystemDependencies", "ModelingToolkit", "OrdinaryDiffEqDefault", "PrecompileTools", "RuntimeGeneratedFunctions", "Test"]
+git-tree-sha1 = "5d9ae7d17500cb3e67f235a964266bf0948da5a6"
+uuid = "824fa3ed-d7dc-4365-8bdf-ac77a1ac2011"
+version = "0.6.4"
 
 [[deps.RuntimeGeneratedFunctions]]
 deps = ["ExprTools", "SHA", "Serialization"]

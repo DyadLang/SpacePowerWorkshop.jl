@@ -1,13 +1,3 @@
-# using SatelliteToolbox
-# using SatelliteAnalysis
-# using LinearAlgebra
-# using DataInterpolations
-# using ModelingToolkit
-# using ModelingToolkit: t_nounits as t
-# using ModelingToolkitStandardLibrary.Blocks
-# using Plots
-# using Example1
-
 ################ 1. Orbital mechanics ################
 # Compute the satellite's position over time using orbital parameters.
 
@@ -63,48 +53,4 @@ facing_sun = Int.(cos.(theta) .>= 0) # 1 if solar panel is facing Sun, 0 otherwi
 facing_sun_interp = QuadraticInterpolation(facing_sun, times_adj)
 
 
-#=
-@mtkmodel TempReading begin
-    @parameters begin
-        G = 1361      # solar irradiance at LEO orbit [W/m^2]
-        A = 5            # solar panel area [m^2]
-        T_ref = 300        # reference temperature [K]
-
-        α = 0.9            # absorptivity of panel
-        ϵ = 0.8            # emissivity of panel
-        σ = 5.67e-8       # Stefan-Boltzmann constant [W/(m^2*K^4)]
-
-    end
-    @variables begin
-        G_eff(t)    # effective irradiance at solar panel [W/m^2]
-        T(t)        # panel temperature [K]
-        θ(t)    # angle between solar panel normal and Sun direction [rad]
-        in_sunlight(t)  # 1 if satellite is in sunlight, 0 otherwise
-        sun_facing(t)   # 1 if solar panel is facing Sun, 0 otherwise
-    end
-    @components begin
-        ex_theta = TimeVaryingFunction(f=theta_interp)                    # angle between solar panel normal and Sun direction [rad]
-        ex_sunlight = TimeVaryingFunction(f=sunlight_interp)      # 1 if satellite is in sunlight, 0 otherwise
-        ex_facing_sun = TimeVaryingFunction(f=facing_sun_interp)    # 1 if solar panel is facing Sun, 0 otherwise
-        # MPPT 
-        # DC-DC converter (takes in voltage)
-    end
-    @equations begin
-        θ ~ ex_theta.output.u
-        in_sunlight ~ ex_sunlight.output.u
-        sun_facing ~ ex_facing_sun.output.u
-
-        T ~ ((α * G_eff)/(ϵ * σ))^(1/4)
-        G_eff ~ G * cos(θ) * in_sunlight * sun_facing
-    end
-end 
-
-@mtkbuild temp = TempReading() 
-prob = ODEProblem(temp, [], (0, end_time), [])
-sol = solve(prob;  saveat=times_adj)
-
-plot(sol.t[1:43200], sol[temp.θ][1:43200])
-plot(sol.t[1:43200], sol[temp.in_sunlight][1:43200])
-plot(sol.t[1:43200], sol[temp.sun_facing][1:43200])
-=#
 

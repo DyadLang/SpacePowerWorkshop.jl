@@ -4,7 +4,7 @@
 ### Instead, update the Dyad source code and regenerate this file
 
 
-"""
+@doc Markdown.doc"""
    MPPT_old(; name, startTime, samplePeriod, VmpRef, ImpRef, n)
 
 ## Parameters: 

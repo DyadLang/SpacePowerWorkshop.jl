@@ -5,6 +5,7 @@
 ### Instead, update the Dyad source code and regenerate this file
 
 using ModelingToolkit
+import Markdown
 using OrdinaryDiffEqDefault
 using RuntimeGeneratedFunctions
 RuntimeGeneratedFunctions.init(@__MODULE__)
@@ -12,19 +13,8 @@ RuntimeGeneratedFunctions.init(@__MODULE__)
 
 
 include("BetaMPPTLoad_test.jl")
-include("Capacitor_test.jl")
-include("CurrentSensor_test.jl")
-include("CurrentSource_test.jl")
-include("Ground_test.jl")
-include("Hello_test.jl")
-include("MPPT_old_test.jl")
 include("PVArray_test.jl")
 include("PVCell_test.jl")
-include("Resistor_test.jl")
-include("SolarPanel_test.jl")
-include("SunlightBlock_test.jl")
-include("SunFacingBlock_test.jl")
-include("ThetaBlock_test.jl")
+include("PVCell_validate_test.jl")
+include("MPPT_old_test.jl")
 include("SolarPanelSimple_test.jl")
-include("VoltageSensor_test.jl")
-include("VoltageSource_test.jl")

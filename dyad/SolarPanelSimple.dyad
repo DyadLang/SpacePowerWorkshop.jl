@@ -21,23 +21,4 @@ relations
     G_eff = max(G * cos(θ) * in_sunlight, 0)
     η = η_ref*(1 - β*(T - T_ref))
     P = G_eff * A * η
-end
-
-
-component SunlightBlock
-    extends BlockComponents.SO
-relations
-    y = sunlight_interp(time)
-end
-
-component SunFacingBlock
-    extends BlockComponents.SO
-relations
-    y = facing_sun_interp(time)
-end
-
-component ThetaBlock
-    extends BlockComponents.SO
-relations
-    y = theta_interp(time)
-end
+end 

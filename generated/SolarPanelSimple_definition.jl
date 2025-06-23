@@ -4,7 +4,7 @@
 ### Instead, update the Dyad source code and regenerate this file
 
 
-"""
+@doc Markdown.doc"""
    SolarPanelSimple(; name, G, A, η_ref, T_ref, β, α, ϵ, σ)
 
 ## Parameters: 

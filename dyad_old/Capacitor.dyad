@@ -1,5 +1,5 @@
 component Capacitor
-  extends TwoPin
+  extends ElectricalComponents.OnePort
   parameter C::Capacitance
 relations
   C*der(v) = i

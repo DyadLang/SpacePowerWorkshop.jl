@@ -5,6 +5,7 @@
 ### Instead, update the Dyad source code and regenerate this file
 
 using ModelingToolkit
+import Markdown
 using ModelingToolkit: t_nounits as t
 using OrdinaryDiffEqDefault
 using RuntimeGeneratedFunctions
@@ -14,6 +15,10 @@ D = Differential(t)
 
 import BlockComponents
 import DyadInterface
+import ElectricalComponents
+@doc Markdown.doc"""
+This connector represents an electrical pin with voltage and current as the potential and flow variables, respectively.
+"""
 @connector function __Dyad__Pin(; name)
   vars = @variables begin
     v(t), []
@@ -21,6 +26,9 @@ import DyadInterface
   end
   return ODESystem(Equation[], t, vars, []; name)
 end
+@doc Markdown.doc"""
+This connector represents a thermal node with temperature and heat flow as the potential and flow variables, respectively.
+"""
 @connector function __Dyad__Node(; name)
   vars = @variables begin
     T(t), []
@@ -28,6 +36,9 @@ end
   end
   return ODESystem(Equation[], t, vars, []; name)
 end
+@doc Markdown.doc"""
+This connector represents a mechanical flange with position and force as the potential and flow variables, respectively.
+"""
 @connector function __Dyad__Flange(; name)
   vars = @variables begin
     s(t), []
@@ -35,6 +46,9 @@ end
   end
   return ODESystem(Equation[], t, vars, []; name)
 end
+@doc Markdown.doc"""
+This connector represents a rotational spline with angle and torque as the potential and flow variables, respectively.
+"""
 @connector function __Dyad__Spline(; name)
   vars = @variables begin
     phi(t), []
@@ -44,19 +58,8 @@ end
 end
 
 include("BetaMPPTLoad_definition.jl")
-include("Capacitor_definition.jl")
-include("CurrentSensor_definition.jl")
-include("CurrentSource_definition.jl")
-include("Ground_definition.jl")
-include("Hello_definition.jl")
-include("MPPT_old_definition.jl")
 include("PVArray_definition.jl")
 include("PVCell_definition.jl")
-include("Resistor_definition.jl")
-include("SolarPanel_definition.jl")
-include("SunlightBlock_definition.jl")
-include("SunFacingBlock_definition.jl")
-include("ThetaBlock_definition.jl")
+include("PVCell_validate_definition.jl")
+include("MPPT_old_definition.jl")
 include("SolarPanelSimple_definition.jl")
-include("VoltageSensor_definition.jl")
-include("VoltageSource_definition.jl")

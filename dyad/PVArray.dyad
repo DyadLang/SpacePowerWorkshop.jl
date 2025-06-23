@@ -1,5 +1,5 @@
 component PVArray
-    extends TwoPin
+    extends ElectricalComponents.OnePort
 
     parameter q::Real = 1.60217646e-19
     parameter Gn::Real = 1000
