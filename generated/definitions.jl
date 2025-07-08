@@ -14,6 +14,7 @@ RuntimeGeneratedFunctions.init(@__MODULE__)
 D = Differential(t)
 
 import BlockComponents
+import DyadData
 import DyadInterface
 import ElectricalComponents
 @doc Markdown.doc"""
@@ -57,9 +58,8 @@ This connector represents a rotational spline with angle and torque as the poten
   return ODESystem(Equation[], t, vars, []; name)
 end
 
-include("BetaMPPTLoad_definition.jl")
-include("PVArray_definition.jl")
+include("DCDC_MPPT_definition.jl")
+include("Hello_definition.jl")
 include("PVCell_definition.jl")
 include("PVCell_validate_definition.jl")
-include("MPPT_old_definition.jl")
 include("SolarPanelSimple_definition.jl")

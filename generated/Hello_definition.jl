@@ -5,54 +5,31 @@
 
 
 @doc Markdown.doc"""
-   MPPT_old(; name, startTime, samplePeriod, VmpRef, ImpRef, n)
+   Hello(; name, k, x0)
 
 ## Parameters: 
 
 | Name         | Description                         | Units  |   Default value |
 | ------------ | ----------------------------------- | ------ | --------------- |
-| `startTime`         |                          | --  |   0 |
-| `samplePeriod`         |                          | --  |   1 |
-| `VmpRef`         |                          | --  |    |
-| `ImpRef`         |                          | --  |    |
-| `n`         |                          | --  |    |
-
-## Connectors
-
- * `power` - This connector represents a real signal as an input to a component ([`RealInput`](@ref))
- * `vRef` - This connector represents a real signal as an output from a component ([`RealOutput`](@ref))
+| `k`         |                          | 1/s  |   1 |
+| `x0`         |                          | K  |   99 |
 
 ## Variables
 
 | Name         | Description                         | Units  | 
 | ------------ | ----------------------------------- | ------ | 
-| `dv`         |                          | --  | 
-| `dpower`         |                          | --  | 
-| `firstTrigger`         |                          | --  | 
-| `sampleTrigger`         |                          | --  | 
-| `counter`         |                          | --  | 
-| `signv`         |                          | --  | 
+| `x`         |                          | m  | 
 """
-@component function MPPT_old(; name, startTime=0, samplePeriod=1, VmpRef=nothing, ImpRef=nothing, n=nothing)
+@component function Hello(; name, k=1, x0=99)
 
   ### Symbolic Parameters
   __params = Any[]
-  append!(__params, @parameters (startTime::Float64 = startTime))
-  append!(__params, @parameters (samplePeriod::Float64 = samplePeriod))
-  append!(__params, @parameters (VmpRef::Float64 = VmpRef))
-  append!(__params, @parameters (ImpRef::Float64 = ImpRef))
-  append!(__params, @parameters (n::Float64 = n))
+  append!(__params, @parameters (k::Float64 = k))
+  append!(__params, @parameters (x0::Float64 = x0))
 
   ### Variables
   __vars = Any[]
-  append!(__vars, @variables power(t), [input = true])
-  append!(__vars, @variables vRef(t), [output = true])
-  append!(__vars, @variables (dv(t)))
-  append!(__vars, @variables (dpower(t)))
-  append!(__vars, @variables (firstTrigger(t)))
-  append!(__vars, @variables (sampleTrigger(t)))
-  append!(__vars, @variables (counter(t)))
-  append!(__vars, @variables (signv(t)))
+  append!(__vars, @variables (x(t)))
 
   ### Constants
   __constants = Any[]
@@ -62,24 +39,21 @@
 
   ### Defaults
   __defaults = Dict()
-  __defaults[firstTrigger] = (true)
-  __defaults[counter] = (1)
+  __defaults[x] = (x0)
 
   ### Initialization Equations
   __initialization_eqs = []
-  push!(__initialization_eqs, signv ~ -1)
 
   ### Equations
   __eqs = Equation[]
-  push!(__eqs, dv ~ VmpRef / n)
-  push!(__eqs, dpower ~ VmpRef * ImpRef / n)
+  push!(__eqs, D(x) ~ -k * x)
 
   # Return completely constructed ODESystem
   return ODESystem(__eqs, t, __vars, __params; systems=__systems, defaults=__defaults, name, initialization_eqs=__initialization_eqs)
 end
-export MPPT_old
+export Hello
 
-Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(MPPT_old)) = print(io,
+Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(Hello)) = print(io,
   """<div style="height: 100%; width: 100%; background-color: white"><div style="margin: auto; height: 500px; width: 500px; padding: 200px"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000"
     overflow="visible" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
       <defs>

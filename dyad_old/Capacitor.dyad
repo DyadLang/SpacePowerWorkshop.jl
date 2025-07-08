@@ -1,6 +1,0 @@
-component Capacitor
-  extends ElectricalComponents.OnePort
-  parameter C::Capacitance
-relations
-  C*der(v) = i
-end 

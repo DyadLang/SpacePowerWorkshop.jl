@@ -5,9 +5,8 @@
 ### Instead, update the Dyad source code and regenerate this file
 
 
-include("BetaMPPTLoad_experiment.jl")
-include("PVArray_experiment.jl")
+include("DCDC_MPPT_experiment.jl")
+include("Hello_experiment.jl")
 include("PVCell_experiment.jl")
 include("PVCell_validate_experiment.jl")
-include("MPPT_old_experiment.jl")
 include("SolarPanelSimple_experiment.jl")

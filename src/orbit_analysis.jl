@@ -1,17 +1,19 @@
+# This is the orbital analysis used in main.jl
+
 ################ 1. Orbital mechanics ################
 # Compute the satellite's position over time using orbital parameters.
 
-jd₀ = date_to_jd(2025, 1, 1, 0, 0, 0)  # start time
+jd₀ = date_to_jd(2026, 1, 1, 0, 0, 0)  # start time
 days = 30  
 
 orb = KeplerianElements(
            jd₀,                 # epoch [JD]
-           7190.982e3,          # semi-major axis [m]
-           0.001111,            # small eccentricity
-           98.405 |> deg2rad,   # inclination [rad]
+           7171e3,              # semi-major axis [m]
+           0.001,               # small eccentricity
+           60   |> deg2rad,     # inclination [rad]
            100    |> deg2rad,   # RAAN [rad]
            90     |> deg2rad,   # argument of perigee [rad]
-           19     |> deg2rad    # true anomaly [rad]
+           20     |> deg2rad    # true anomaly [rad]
        )
 
 orbp = Propagators.init(Val(:J2), orb)
@@ -33,12 +35,14 @@ end_time = maximum(times_adj)
 sun_pos = [sun_position_mod(jd) for jd in times] # vector from Earth center to Sun
 sun_vec = sun_pos .- sat_pos # vector from Satellite to Sun
 
+
 ################ 3. Illumination condition ################
 # Figure out whether the satellite is in sunlight or eclipse.
 
 sat_condition = lighting_condition.(sat_pos, sun_pos)
 sunlight = Int.(sat_condition .== :sunlight)   # 1 if satellite is in sunlight, 0 otherwise  
 sunlight_interp =  QuadraticInterpolation(sunlight, times_adj)    
+
 
 ################ 4. Solar panel orientation ################
 # Compute the angle between the panel normal and the sun vector. 
@@ -48,9 +52,3 @@ panel_norm = sat_vel./norm.(sat_vel) # unit norm for solar panels; assume panels
 
 theta = acos.(dot.(panel_norm, sun_unit)) # angle between solar panel normal and Sun direction [rad]
 theta_interp =  QuadraticInterpolation(theta, times_adj)
-
-facing_sun = Int.(cos.(theta) .>= 0) # 1 if solar panel is facing Sun, 0 otherwise
-facing_sun_interp = QuadraticInterpolation(facing_sun, times_adj)
-
-
-

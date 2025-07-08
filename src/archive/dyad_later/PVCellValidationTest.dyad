@@ -1,0 +1,13 @@
+component PVCellValidationTest 
+
+    cell = PVCell_validate()
+    vref = ElectricalComponents.VoltageSource()
+    i = ElectricalComponents.CurrentSensor()
+    ground = ElectricalComponents.Ground()
+
+relations
+    connect(ground.g, cell.n, vref.n)
+    connect(cell.p, i.n)
+    connect(i.p, vref.p)
+    vref.V = t*35/10
+end

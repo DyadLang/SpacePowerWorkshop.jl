@@ -1,4 +1,3 @@
-
 component SolarPanelSimple
     variable G_eff::Real
     variable T::Temperature
@@ -21,4 +20,4 @@ relations
     G_eff = max(G * cos(θ) * in_sunlight, 0)
     η = η_ref*(1 - β*(T - T_ref))
     P = G_eff * A * η
-end 
+end

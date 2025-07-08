@@ -1,6 +1,0 @@
-component Capacitor
-  extends TwoPin
-  parameter C::Capacitance
-relations
-  C*der(v) = i
-end 

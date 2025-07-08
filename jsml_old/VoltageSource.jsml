@@ -1,9 +1,0 @@
-# The input signal `V` is provided as the voltage difference across the positive to
-# the negative pins.
-component VoltageSource
-  extends TwoPin
-  V = RealInput() 
-  parameter uV::Voltage = 1.0
-relations
-  v = V*uV
-end

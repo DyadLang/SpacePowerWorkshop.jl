@@ -1,9 +1,0 @@
-# A simple linear resistor model
-component Resistor
-  extends TwoPin
-  # Resistance of this Resistor
-  parameter R::Resistance
-relations
-  # Ohm's Law
-  v = i*R
-end

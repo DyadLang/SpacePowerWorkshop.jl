@@ -1,5 +1,0 @@
-component Ground
-  g = Pin()
-relations
-  g.v = 0
-end

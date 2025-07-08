@@ -5,9 +5,9 @@
 
 
 @doc Markdown.doc"""
-   BetaMPPTLoad(; name, β, q, K, hotel_load, capacity, power_rate)
+   DCDC_MPPT(; name, β, q, K, hotel_load, capacity, power_rate)
 
-A simple linear resistor model maybe name = MPPT Power Supply
+A simple DC-DC converter with integrated MPPT# Idealized battery
 
 ## Parameters: 
 
@@ -37,7 +37,7 @@ A simple linear resistor model maybe name = MPPT Power Supply
 | `stored_energy`         |                          | --  | 
 | `charge_power`         |                          | --  | 
 """
-@component function BetaMPPTLoad(; name, β=nothing, q=1.602176634e-19, K=1.380649e-23, hotel_load=50, capacity=4, power_rate=300)
+@component function DCDC_MPPT(; name, β=nothing, q=1.602176634e-19, K=1.380649e-23, hotel_load=50, capacity=4, power_rate=300)
 
   ### Symbolic Parameters
   __params = Any[]
@@ -80,14 +80,15 @@ A simple linear resistor model maybe name = MPPT Power Supply
   push!(__eqs, log(max(i / v, 0.1)) - c * v ~ β)
   push!(__eqs, c ~ 1 / Vt)
   push!(__eqs, D(stored_energy) ~ charge_power)
+  # line 27 = lower bound# line 28 = upper bound
   push!(__eqs, charge_power ~ min(max(i * v - hotel_load, -power_rate * (tanh(10 * (stored_energy - 0.2)) + 1) / 2), power_rate * (tanh(10 * (-stored_energy + capacity)) + 1) / 2))
 
   # Return completely constructed ODESystem
   return ODESystem(__eqs, t, __vars, __params; systems=__systems, defaults=__defaults, name, initialization_eqs=__initialization_eqs)
 end
-export BetaMPPTLoad
+export DCDC_MPPT
 
-Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(BetaMPPTLoad)) = print(io,
+Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(DCDC_MPPT)) = print(io,
   """<div style="height: 100%; width: 100%; background-color: white"><div style="margin: auto; height: 500px; width: 500px; padding: 200px"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000"
     overflow="visible" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
       <defs>

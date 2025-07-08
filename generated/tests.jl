@@ -12,9 +12,8 @@ RuntimeGeneratedFunctions.init(@__MODULE__)
 
 
 
-include("BetaMPPTLoad_test.jl")
-include("PVArray_test.jl")
+include("DCDC_MPPT_test.jl")
+include("Hello_test.jl")
 include("PVCell_test.jl")
 include("PVCell_validate_test.jl")
-include("MPPT_old_test.jl")
 include("SolarPanelSimple_test.jl")
