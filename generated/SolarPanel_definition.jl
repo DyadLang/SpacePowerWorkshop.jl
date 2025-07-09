@@ -5,55 +5,48 @@
 
 
 @doc Markdown.doc"""
-   Hello(; name, k, x0)
-
-## Parameters: 
-
-| Name         | Description                         | Units  |   Default value |
-| ------------ | ----------------------------------- | ------ | --------------- |
-| `k`         |                          | 1/s  |   1 |
-| `x0`         |                          | K  |   99 |
-
-## Variables
-
-| Name         | Description                         | Units  | 
-| ------------ | ----------------------------------- | ------ | 
-| `x`         |                          | m  | 
+   SolarPanel(; name)
 """
-@component function Hello(; name, k=1, x0=99)
+@component function SolarPanel(; name)
 
   ### Symbolic Parameters
   __params = Any[]
-  append!(__params, @parameters (k::Float64 = k))
-  append!(__params, @parameters (x0::Float64 = x0))
 
   ### Variables
   __vars = Any[]
-  append!(__vars, @variables (x(t)))
 
   ### Constants
   __constants = Any[]
 
   ### Components
   __systems = ODESystem[]
+  push!(__systems, @named cell = SpacePowerWorkshop.PVCell())
+  push!(__systems, @named converter = SpacePowerWorkshop.DCDC_MPPT())
+  push!(__systems, @named i = ElectricalComponents.CurrentSensor())
+  push!(__systems, @named ground = ElectricalComponents.Ground())
+  push!(__systems, @named temp = SpacePowerWorkshop.TempSensor())
 
   ### Defaults
   __defaults = Dict()
-  __defaults[x] = (x0)
 
   ### Initialization Equations
   __initialization_eqs = []
 
   ### Equations
   __eqs = Equation[]
-  push!(__eqs, D(x) ~ -k * x)
+  push!(__eqs, cell.G ~ temp.G_eff)
+  push!(__eqs, cell.T_reading ~ temp.T)
+  push!(__eqs, connect(ground.g, cell.n, converter.n))
+  push!(__eqs, connect(cell.p, i.n))
+  push!(__eqs, connect(i.p, converter.p))
+  push!(__eqs, cell.Vt ~ converter.Vt)
 
   # Return completely constructed ODESystem
   return ODESystem(__eqs, t, __vars, __params; systems=__systems, defaults=__defaults, name, initialization_eqs=__initialization_eqs)
 end
-export Hello
+export SolarPanel
 
-Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(Hello)) = print(io,
+Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(SolarPanel)) = print(io,
   """<div style="height: 100%; width: 100%; background-color: white"><div style="margin: auto; height: 500px; width: 500px; padding: 200px"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000"
     overflow="visible" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
       <defs>

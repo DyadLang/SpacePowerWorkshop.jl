@@ -7,6 +7,8 @@
 @doc Markdown.doc"""
    PVCell(; name, Rs, Rp, T, Gn, ipv_n, Ki, a, Ns, Vocn, Iscn, Kv, k, q)
 
+Photovoltaic cell model floating in space
+
 ## Parameters: 
 
 | Name         | Description                         | Units  |   Default value |

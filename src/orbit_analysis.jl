@@ -1,4 +1,8 @@
 # This is the orbital analysis used in main.jl
+using SatelliteToolbox
+using SatelliteAnalysis
+using LinearAlgebra
+using DataInterpolations
 
 ################ 1. Orbital mechanics ################
 # Compute the satellite's position over time using orbital parameters.

@@ -1,3 +1,4 @@
+# Photovoltaic cell model floating in space
 component PVCell 
 
     parameter Rs::Real=0.221
@@ -87,4 +88,17 @@ relations
 
     Im.I = max(ipv - i0 * rolloff - (V.v + Rs*Im.I)/Rp, 0)*(1 - over_v)
     over_v = (tanh(2*(V.v - Vocn)) + 1) / 2
+end
+
+component PVCellValidation
+    cell = PVCell_validate()
+    vref = ElectricalComponents.VoltageSource()
+    i = ElectricalComponents.CurrentSensor()
+    ground = ElectricalComponents.Ground()
+
+relations
+    connect(ground.g, cell.n, vref.n)
+    connect(cell.p, i.n)
+    connect(i.p, vref.p)
+    vref.V = time*35/10
 end

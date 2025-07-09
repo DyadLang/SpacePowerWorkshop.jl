@@ -1,0 +1,14 @@
+component SolarPanel
+    cell = PVCell()
+    converter = DCDC_MPPT()
+    i = ElectricalComponents.CurrentSensor()
+    ground = ElectricalComponents.Ground()
+    temp = TempSensor()
+relations
+    connect(ground.g, cell.n, converter.n)
+    connect(cell.p, i.n)
+    connect(i.p, converter.p)
+    connect(cell.Vt, converter.Vt)
+    cell.G = temp.G_eff
+    cell.T_reading = temp.T
+end

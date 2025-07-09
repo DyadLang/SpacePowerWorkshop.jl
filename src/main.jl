@@ -1,4 +1,4 @@
-using Example1
+using SpacePowerWorkshop
 using SatelliteToolbox
 using SatelliteAnalysis
 using LinearAlgebra
@@ -17,7 +17,7 @@ using ElectricalComponents
 
 include("orbit_analysis.jl")
 
-@mtkmodel TempSensor begin
+@mtkmodel TempSensor2 begin
     @parameters begin
         G = 1361      # solar irradiance at LEO orbit [W/m^2]
         A = 5         # solar panel area [m^2]
@@ -51,13 +51,13 @@ prob1 = ODEProblem(temp, [], (0, end_time), [])
 sol1 = solve(prob1;  saveat=times_adj)
 
 # Temperature
-plot(sol1.t[1:86400], sol1[temp.T][1:86400],
+Plots.plot(sol1.t[1:86400], sol1[temp.T][1:86400],
     title="Temperature", xlabel="Day", ylabel="K", label=false,
     left_margin=5mm, bottom_margin=5mm, linewidth=3,
     titlefont=font(18), legendfont=font(10), guidefont=font(18), tickfont=font(14),
     size=(800,600))
 # Effective irradiance
-plot(sol1.t[1:86400], sol1[temp.G_eff][1:86400],
+Plots.plot(sol1.t[1:86400], sol1[temp.G_eff][1:86400],
     title="Effective Irradiance", xlabel="Day", ylabel="Watt / m²", label=false,
     left_margin=5mm, bottom_margin=5mm, linewidth=3,
     titlefont=font(18), legendfont=font(10), guidefont=font(18), tickfont=font(14),

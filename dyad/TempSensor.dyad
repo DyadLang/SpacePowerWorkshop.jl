@@ -1,0 +1,48 @@
+# A type alias for a function that takes a real and returns a real
+# 
+# This is used to define the type of the interpolators that are used in
+# the temperature sensor model.
+type RealInterpolator = func(::Real)::Real
+
+# Temperature sensor model
+# 
+# This temperature sensor uses the hardcoded orbital parameters in the module
+# to compute the temperature on a solar panel at a given time in the orbit.
+# For this to work the module defining this must have two 1-argument callables
+# `theta_interp` and `sunlight_interp`.
+#
+# Some notes I have from writing this:
+# - `using SpacePowerWorkshop: theta_interp(::Real)::Real` as suggested in the Dyad docs fails, \
+#   it's a lex and/or parse error but does not give me more information than that.
+# - How do I declare a variable as output or input?  Do I really have to create a connector specifically for this?
+#   - Following on this, can connectors be nested?
+# - The lack of comments is pretty annoying.
+component TempSensor
+    # solar irradiance at LEO orbit [W/m^2]
+    parameter G::Real = 1361
+    # solar panel area [m^2]
+    parameter A::Real = 5
+    # reference temperature [K]
+    parameter T_ref::Real = 300
+    # absorptivity of panel
+    parameter α::Real = 0.9
+    # emissivity of panel
+    parameter ϵ::Real = 0.8
+    # Stefan-Boltzmann constant [W/(m^2*K^4)]
+    parameter σ::Real = 5.67e-8
+    # Interpolator for the angle between the solar panel normal and the Sun direction
+    parameter theta::RealInterpolator = theta_interp
+    # Interpolator for the sunlight intensity (0 to 1)
+    parameter sunlight::RealInterpolator = sunlight_interp
+
+    # Effective irradiance at solar panel [W/m^2]
+    G_eff = RealOutput()
+    # Panel temperature [K]
+    T = RealOutput()
+    time = RealInput()
+relations
+    # Compute the effective solar irradiance
+    G_eff = max(G * cos(theta(time)) * sunlight(time), 0)
+    # Compute the temperature
+    T = max(((α * G_eff)/(ϵ * σ))^(1/4), 125)
+end
