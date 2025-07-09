@@ -1,7 +1,9 @@
-module Example1
+module SpacePowerWorkshop
+
+include("orbit_analysis.jl")
 
 include("../generated/definitions.jl")
 include("../generated/experiments.jl")
 include("../generated/precompilation.jl")
     
-end # module Example1
+end # module SpacePowerWorkshop

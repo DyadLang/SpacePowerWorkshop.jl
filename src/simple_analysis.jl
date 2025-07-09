@@ -8,7 +8,7 @@ using ModelingToolkit
 using ModelingToolkit: t_nounits as t
 using ModelingToolkitStandardLibrary.Blocks
 using Plots
-using Example1
+using SpacePowerWorkshop
 
 ################ 1. Orbital mechanics ################
 # Compute the satellite's position over time using orbital parameters.
