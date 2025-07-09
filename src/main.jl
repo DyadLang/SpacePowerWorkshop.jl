@@ -13,9 +13,8 @@ using SciMLBase
 using ElectricalComponents
 
 
-################ 1. Orbit Analysis ################
+################ 1. Temperature Sensor ################
 
-num_days = 30
 include("orbit_analysis.jl")
 
 @mtkmodel TempSensor begin
@@ -126,7 +125,7 @@ plot!(sol4[validation_test.vref.V][1:9472], sol4[-validation_test.i.i][1:9472], 
 end
 
 @mtkbuild panel = SolarPanel()
-prob5 = ODEProblem(panel, [panel.converter.β => -28, panel.converter.stored_energy => 1], (0.0, num_days); guesses=[panel.cell.Im.i => 8.207600054307171, panel.converter.v => 1])
+prob5 = ODEProblem(panel, [panel.converter.β => -28, panel.converter.stored_energy => 1], (0.0, end_time); guesses=[panel.cell.Im.i => 8.207600054307171, panel.converter.v => 1])
 sol5 = solve(prob5; dtmax=0.001)
 
 ##### Day 1 plots #####
