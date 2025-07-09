@@ -1,0 +1,6 @@
+/generated/** linguist-generated
+/docs/src/components/** linguist-generated
+/docs/src/tests/** linguist-generated
+/docs/src/types/** linguist-generated
+/test/snapshots/** linguist-generated
+Manifest*.toml linguist-generated
