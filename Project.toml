@@ -5,6 +5,7 @@ version = "0.1.0"
 
 [deps]
 BlockComponents = "1ef5d832-be8e-447f-9f2c-8b5d17d15fd3"
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 DataInterpolations = "82cc6244-b520-54b8-b5a6-8a565e85f1d0"
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
 DyadData = "cab12561-e36c-4498-ae70-c9a5e79fef2a"
@@ -24,6 +25,7 @@ SciMLBase = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
 
 [compat]
 BlockComponents = "2.3.3"
+CairoMakie = "0.13.10"
 DataInterpolations = "7.2.0"
 DifferentialEquations = "7.16.1"
 DyadData = "1.2.2"

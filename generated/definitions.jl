@@ -58,10 +58,10 @@ This connector represents a rotational spline with angle and torque as the poten
   return ODESystem(Equation[], t, vars, []; name)
 end
 
-include("SolarPanelSimple_definition.jl")
-include("SolarPanel_definition.jl")
 include("DCDC_MPPT_definition.jl")
-include("TempSensor_definition.jl")
 include("PVCell_definition.jl")
 include("PVCell_validate_definition.jl")
 include("PVCellValidation_definition.jl")
+include("SolarPanel_definition.jl")
+include("SolarPanelSimple_definition.jl")
+include("TempSensor_definition.jl")

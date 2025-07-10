@@ -7,8 +7,7 @@
 @doc Markdown.doc"""
    DCDC_MPPT(; name, β, q, K, hotel_load, capacity, power_rate)
 
-A simple DC-DC converter with integrated MPPT
-Idealized battery
+A simple DC-DC converter with integrated MPPT# Idealized battery
 
 ## Parameters: 
 
@@ -81,8 +80,7 @@ Idealized battery
   push!(__eqs, log(max(i / v, 0.1)) - c * v ~ β)
   push!(__eqs, c ~ 1 / Vt)
   push!(__eqs, D(stored_energy) ~ charge_power)
-  # line 27 = lower bound
-  # line 28 = upper bound
+  # line 27 = lower bound# line 28 = upper bound
   push!(__eqs, charge_power ~ min(max(i * v - hotel_load, -power_rate * (tanh(10 * (stored_energy - 0.2)) + 1) / 2), power_rate * (tanh(10 * (-stored_energy + capacity)) + 1) / 2))
 
   # Return completely constructed ODESystem

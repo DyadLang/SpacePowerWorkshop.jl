@@ -67,7 +67,7 @@ f
 # construct it with the `@mtkbuild` macro.
 
 @time @mtkbuild panel = SolarPanel()
-prob = ODEProblem(panel, [panel.converter.β => -28, panel.converter.stored_energy => 1], (0.0, end_time); guesses=[panel.cell.Im.i => 8.207600054307171, panel.converter.v => 1])
+prob = ODEProblem(panel, [panel.converter.β => -28, panel.converter.stored_energy => 1], (0.0, SpacePowerWorkshop.end_time); guesses=[panel.cell.Im.i => 8.207600054307171, panel.converter.v => 1])
 sol = solve(prob; dtmax=0.001)
 # Finally we can plot this too:
 f, a1, p1 = plot(sol; idxs = panel.cell.Im.I * panel.cell.V.v, tspan = (0, sol.t[1650]))
