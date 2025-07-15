@@ -4,6 +4,8 @@ using SpacePowerWorkshop
 using SpacePowerWorkshop: jd_to_gmst, date_to_jd
 using LinearAlgebra
 
+using SatelliteToolboxTransformations
+
 # ## Setup
 # We will use some image assets for the visualization, these should all be publically usable.
 
@@ -33,40 +35,28 @@ prob = ODEProblem(
 )
 sol = solve(prob; dtmax=0.001)
 
-# ### Sun light
-# Since this demo is about solar power, we want to 
-# indicate where the sun is with respect to the Earth.
-# In order to do this, we use a directional light to indicate the direction of the sun.
+# ### Satellite orbit
+# We want everything to be in the reference frame ECEF (Earth-Centered, Earth-Fixed)
+# since that is the best for GIS visualization.
+# We could choose to keep everything in TEME which is inertial and so the Earth rotates within it,
+# but that gets annoying to deal with until we have better tools for it in GeoMakie (which we will at some point!)
+#
+# So, let's transform everything from TEME to ECEF.
+# The propagator is in TEME.
+eop = SatelliteToolboxTransformations.fetch_iers_eop()
+sat_pos_ecef = @. SatelliteToolboxTransformations.r_eci_to_ecef(
+    (TEME(),),
+    (ITRF(),),
+    SpacePowerWorkshop.times, # times in julian date
+    (eop,)
+) * SpacePowerWorkshop.sat_pos
 
-# To do this, we need to know the direction of the sun from the Earth.
-# We can get this from the sun vector in the propagator.
-direction_from_earth_to_sun = normalize(first(SpacePowerWorkshop.sun_vec))
-direction_from_sun_to_earth = -direction_from_earth_to_sun
-
-# Rotate the sun direction by 23 degrees south to position it on the equator
-# This accounts for Earth's axial tilt
-obliquity_angle = deg2rad(23.0)  # 23 degrees in radians
-# Create rotation axis (perpendicular to sun direction, in the xy-plane)
-rotation_axis = normalize(cross(direction_from_sun_to_earth, [0, 0, 1]))
-# Create rotation matrix for 23 degrees south
-cos_θ = cos(obliquity_angle)
-sin_θ = sin(obliquity_angle)
-ux, uy, uz = rotation_axis
-# Rodrigues' rotation formula in matrix form
-rotation_matrix = [
-    cos_θ + ux^2 * (1 - cos_θ)         ux*uy*(1 - cos_θ) - uz*sin_θ    ux*uz*(1 - cos_θ) + uy*sin_θ
-    uy*ux*(1 - cos_θ) + uz*sin_θ      cos_θ + uy^2 * (1 - cos_θ)       uy*uz*(1 - cos_θ) - ux*sin_θ
-    uz*ux*(1 - cos_θ) - uy*sin_θ      uz*uy*(1 - cos_θ) + ux*sin_θ     cos_θ + uz^2 * (1 - cos_θ)
-]
-# Apply rotation to get the adjusted sun direction
-direction_from_sun_to_earth = rotation_matrix * direction_from_sun_to_earth
-
-sun_light = Makie.DirectionalLight(Colors.WP_A |> RGBf, direction_from_sun_to_earth)
+# sun_light = Makie.DirectionalLight(Colors.WP_A |> RGBf, direction_from_sun_to_earth)
 fig = with_theme(theme_dark()) do
-    Figure(; figure_padding = 0);
+    Figure(; figure_padding = 0, size = (600, 900));
 end
-ax = GlobeAxis(fig[1, 1]; show_axis = false)
-push!(ax.scene.lights, sun_light)
+ax = GlobeAxis(fig[1, 1]; show_axis = false, height = 600, width = 600)
+# push!(ax.scene.lights, sun_light)
 earth_plt = meshimage!(
     ax, -180..180, -90..90, blue_marble_img;
     uv_transform = :rotr90,
@@ -84,8 +74,21 @@ only(earth_plt.plots).shading[] = Makie.MultiLightShading
 
 fig
 
-satellite_marker = Observable{Point3f}(Point3f(0, 0, 0))
-satellite_trajectory = Observable{Vector{Point3f}}(Point3f[(0,0,0), (1, 1, 1)])
+time_rel = Observable(0.001)
+
+satellite_marker = lift(time_rel) do t
+    sat_pos_ecef[round(Int, t * 86400) + 1]
+end
+
+satellite_trajectory = lift(time_rel) do t
+    sat_pos_ecef[max(1, round(Int, t * 86400) - 180 * 30):round(Int, t * 86400) + 1]
+end
+
+sunlight_fraction = lift(time_rel) do t
+    SpacePowerWorkshop.sunlight_interp(t)
+end
+
+
 # satellite_mesh = load("/Users/anshul/Downloads/ImageToStl.com_CubeSat+-+1+RU+Generic/CubeSat - 1 RU Generic.obj")
 
 satellite_marker_plt = scatter!(
@@ -97,29 +100,103 @@ satellite_marker_plt = scatter!(
 satellite_trajectory_spec = lift(satellite_trajectory) do trajectory
     [Makie.SpecApi.Lines(
         trajectory;
-        color = RGBAf.((Makie.wong_colors()[2],), LinRange(0, 1, length(trajectory)))
+        color = if length(trajectory) == 1
+            [Makie.wong_colors(1.0)[2]]
+            else
+                RGBAf.((Makie.wong_colors()[2],), LinRange(0, 1, length(trajectory)))
+            end
     )]
 end
 satellite_trajectory_plt = plotlist!(ax.scene, satellite_trajectory_spec)
 
-record(fig, "earth_rotations.mp4", LinRange(0.01, 5, 2000); framerate = 60, update = false) do t_days
-    t_seconds = t_days * 86400
-    # Note: we assume the propagator is in the TEME reference frame but the earth is of course in ecef
-    # and the sun is in another reference frame.
-    # To get all of these together requires some juggling.
-    # At some point, GeoMakie's globe axis should just handle all of this
-    # and we specify some target datum that it goes to.
-    
-    # Acquire current GMST so we can adjust our ECEF frame of Earth to the TEME frame (inertial, so Earth rotates within the frame)
-    current_gmst = jd_to_gmst(t_days + SpacePowerWorkshop.jd₀)
-    # Rotate the earth to reflect the current GMST
-    rotate!(earth_plt, Vec3f(0, 0, 1), -current_gmst)
-    # Update the satellite marker and trajectory
-    current_satellite_position_idx = round(Int, t_seconds) + 1
-    satellite_marker[] = SpacePowerWorkshop.sat_pos[current_satellite_position_idx]
-    satellite_trajectory[] = SpacePowerWorkshop.sat_pos[max(1, current_satellite_position_idx - 180 * 30):current_satellite_position_idx]
-    
+# Finally, create a 'dashboard layout' at the bottom of the figure,'
+# that we can place information in.
+info_gl = GridLayout(fig[1, 1, Bottom()], height = 100, tellheight = false, valign = :bottom, alignmode = Outside(10))
 
+ind_grad = Makie.cgrad(:RdYlGn_10)
+in_sunlight_label = Label(
+    info_gl[1, 1], 
+    @lift Makie.rich("Sunlight fraction: ", Makie.rich("⬤", color = ind_grad[$sunlight_fraction]), string(round($sunlight_fraction, digits = 2)));
+    valign = :center,
+    tellheight = false,
+)
+
+min_power, max_power = extrema(sol[panel.cell.Im.I * panel.cell.V.v])
+
+power_label = Label(
+    info_gl[1, 2],
+    @lift Makie.rich("Power: ", 
+        Makie.rich(
+            lpad(string(round(Int, (sol($(time_rel); idxs = panel.cell.Im.I * panel.cell.V.v) - min_power) / (max_power - min_power) * 100)), 3);
+            color = Makie.wong_colors(1.0)[1],
+            font = "Fira Mono"
+            ), 
+        "%",
+    );
+    valign = :center,
+    tellheight = false,
+)
+power_ax, power_plot = lines(
+    info_gl[1, 3],
+    lift(time_rel) do t
+        trange = LinRange(max(0, t - 90/(60*24)), t, 1000)
+        current_power = sol(trange; idxs = panel.cell.Im.I * panel.cell.V.v)
+        Point2f.(LinRange(0, 1, length(trange)), current_power)
+    end;
+    axis = (; 
+        limits = ((0, 1), (min_power, max_power)),
+        xticks = ([0, 0.5, 1], ["-90 min", "-45 min", "now"]),
+    ),
+    linewidth = 5
+)
+
+# ## Ground track
+# We can also plot a ground track of the satellite.
+# Maybe this should have a Tyler map?  But that's too brittle.
+# This gets plotted on a projected map of earth.
+ground_ax = GeoAxis(fig[2, 1]; limits = ((-180, 180), (-90, 90)), title = "Ground Track")
+meshimage!(ground_ax, -180..180, -90..90, blue_marble_img; uv_transform = :rotr90)
+lines!(ground_ax, GeoMakie.coastlines(); color = :white)
+satellite_marker_ground_plt = scatter!(ground_ax, @lift([$satellite_marker]); source = "+proj=cart +type=crs", marker = :circle, color = :blue, strokecolor = :white, strokewidth = 1)
+
+# this janky thing is because Makie doesn't allow the transformation to 
+# manipulate geometry directly.
+# but that's coming soon!
+trajectory_longlat = lift(satellite_trajectory) do trajectory_ecef
+    trajectory_longlat = [begin; lat, lon, alt = SatelliteToolboxTransformations.ecef_to_geodetic(ecef); Point2(rad2deg(lon), rad2deg(lat)); end for ecef in trajectory_ecef]
+    split_mls = Base.split(GeometryBasics.LineString(trajectory_longlat), 180.0)
+    joined_ls = Point2{Float64}[] 
+    # joined_ls_color = Float64[]
+    i = 1
+    for idx in 1:(length(split_mls.linestrings) - 1)
+        linestring = split_mls.linestrings[idx]
+        append!(joined_ls, getproperty(linestring, :points))
+        # append!(joined_ls_color, collect(Float64(i):Float64(i + length(getproperty(linestring, :points)) - 1)))
+        push!(joined_ls, Point2{Float64}(NaN))
+        # push!(joined_ls_color, NaN)
+        i += length(getproperty(linestring, :points))
+    end
+    linestring = split_mls.linestrings[end]
+    append!(joined_ls, getproperty(linestring, :points))
+    # append!(joined_ls_color, collect(Float64(i):Float64(i + length(getproperty(linestring, :points)) - 1)))
+    # [Makie.SpecApi.Lines(joined_ls, color = joined_ls_color)]
+    joined_ls
+end
+# finally, plot the ground track.
+satellite_split_trajectory_plt = lines!(ground_ax, trajectory_longlat; color = Makie.Cycled(2))
+
+
+# ## Animation
+# Since we set up this observable update chain, 
+# updating the time observable will cause a cascade of updates
+# down to the rest of the observables.
+@time record(fig, "earth_rotations.mp4", LinRange(0.01, 2, 2000); framerate = 60, update = false) do t_days
+    t_seconds = t_days * 86400
+    # Update the relative time Observable
+    # This cascades and updates all of the other observables,
+    # which update the visuals.
+    time_rel[] = t_days
+    # reset_limits!(power_ax)
 end
 
 
