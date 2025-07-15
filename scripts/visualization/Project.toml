@@ -1,0 +1,15 @@
+[deps]
+DataInterpolations = "82cc6244-b520-54b8-b5a6-8a565e85f1d0"
+DyadInterface = "99806f68-afab-45ca-9d8c-ceff6bc61f54"
+FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
+FlyThroughPaths = "c11bb9a7-2755-425a-88f3-ebe93bbdb91f"
+GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
+GeoInterface = "cf35fbd7-0cd7-5166-be24-54bfbe79505f"
+GeoMakie = "db073c08-6b98-4ee5-b6a4-5efafb3259c6"
+GeometryOps = "3251bfac-6a57-4b6d-aa61-ac1fef2975ab"
+ImageIO = "82e4d734-157c-48bb-816b-45c225c6df19"
+SatelliteToolboxTransformations = "6b019ec1-7a1e-4f04-96c7-a9db1ca5514d"
+SpacePowerWorkshop = "8c5872ae-171c-4c52-b73c-5e25d4616bb7"
+
+[sources]
+SpacePowerWorkshop = {path = "../../"}
