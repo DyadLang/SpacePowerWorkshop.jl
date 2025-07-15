@@ -1,10 +1,12 @@
 using GLMakie, GeoMakie
+
+using SatelliteToolbox, SatelliteToolboxTransformations
 using DataInterpolations: LinearInterpolation
+
 using SpacePowerWorkshop
 using SpacePowerWorkshop: jd_to_gmst, date_to_jd
-using LinearAlgebra
 
-using SatelliteToolboxTransformations
+using LinearAlgebra, Dates
 
 # ## Setup
 # We will use some image assets for the visualization, these should all be publically usable.
@@ -136,8 +138,21 @@ power_label = Label(
     valign = :center,
     tellheight = false,
 )
+
+time_label = Label(
+    info_gl[2, 1:2],
+    lift(time_rel) do t
+        Makie.rich(
+            "Time: ",
+            Dates.format(julian2datetime(t + SpacePowerWorkshop.jd₀), "u dd HH:MM:SS")
+        )
+    end;
+    tellwidth = false,
+    tellheight = false,
+)
+
 power_ax, power_plot = lines(
-    info_gl[1, 3],
+    info_gl[1:2, 3],
     lift(time_rel) do t
         trange = LinRange(max(0, t - 90/(60*24)), t, 1000)
         current_power = sol(trange; idxs = panel.cell.Im.I * panel.cell.V.v)
@@ -190,7 +205,7 @@ satellite_split_trajectory_plt = lines!(ground_ax, trajectory_longlat; color = M
 # Since we set up this observable update chain, 
 # updating the time observable will cause a cascade of updates
 # down to the rest of the observables.
-@time record(fig, "earth_rotations.mp4", LinRange(0.01, 2, 2000); framerate = 60, update = false) do t_days
+@time record(fig, "earth_rotations.mp4", LinRange(2, 4, 2000); framerate = 60, update = false) do t_days
     t_seconds = t_days * 86400
     # Update the relative time Observable
     # This cascades and updates all of the other observables,
