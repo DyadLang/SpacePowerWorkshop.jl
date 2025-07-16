@@ -1,6 +1,7 @@
 using GLMakie
 using GeoMakie, Tyler
 using GeoMakie.Proj, GeoMakie.GeometryBasics
+using GeoMakie.Makie.Observables
 
 using SatelliteToolbox, SatelliteToolboxTransformations
 using DataInterpolations: LinearInterpolation
