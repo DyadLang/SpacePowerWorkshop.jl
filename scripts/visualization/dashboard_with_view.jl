@@ -31,13 +31,13 @@ starry_background_img = load("eso0932a.tif")
 # Finally, we run a simulation of the solar cell so we can show a dashboard of the power output.
 using ModelingToolkit, DyadInterface
 @time @mtkbuild panel = SolarPanel()
-prob = ODEProblem(
+prob = @time ODEProblem(
     panel, 
     [panel.converter.β => -28, panel.converter.stored_energy => 1], # parameter overrides
     (0.0, SpacePowerWorkshop.end_time);                             # time span
     guesses = [panel.cell.Im.i => 8.207600054307171, panel.converter.v => 1]
 )
-sol = solve(prob; dtmax=0.001)
+sol = @time solve(prob; dtmax=0.001)
 
 # ### Satellite orbit
 # We want everything to be in the reference frame ECEF (Earth-Centered, Earth-Fixed)
@@ -244,4 +244,38 @@ end
 
 @time record(fig, "dashboard_with_view.mp4", LinRange(3, 3.5, 3000); framerate = 60, update = false) do t
     time_rel[] = t
+end
+
+
+# Here's the dashboard controls to run the animation interactively.
+play_button = Button(diag_gl[4, 1]; tellwidth = false, tellheight = true, label = "▶")
+is_playing = Observable(false)
+
+play_button_listener = on(play_button.clicks; priority = 1000) do _
+    is_playing[] = !is_playing[]
+    if is_playing[]
+        play_button.label[] = "||"
+    else
+        play_button.label[] = "▶"
+    end
+end
+
+latest_is_playing = Makie.Observables.async_latest(is_playing)
+
+player_listener = Makie.Observables.on(latest_is_playing) do should_play
+    println("player_listener")
+    if should_play
+        while time_rel[] < 25 && is_playing[]
+            tic = time()
+            time_rel[] += 0.0003333333333333333
+            yield()
+            toc = time()
+            if tic - toc < 1/30
+                time_to_sleep = max(0, 1/30 - (toc - tic))
+                sleep(time_to_sleep)
+            end
+        end
+    else
+        # do nothing, since this will stop the while loop
+    end
 end
