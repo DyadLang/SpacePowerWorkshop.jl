@@ -77,8 +77,26 @@ background_plt = meshimage!(
 only(earth_plt.plots).shading[] = Makie.MultiLightShading
 # END BUG SECTION
 
-fig
+# ### View point for overview plot
+# We want to look down at the earth from some point in space,
+# usually centered on a point on the earth.  Since JuliaCon is coming up,
+# let's look at Pittsburgh.
+pittsburgh_lonlat = (-79.9428, 40.4432)
+pittsburgh_ecef = GeoMakie.Geodesy.ECEFfromLLA(GeoMakie.wgs84)(
+        GeoMakie.Geodesy.LLA(; 
+        lon = pittsburgh_lonlat[1], 
+        lat = pittsburgh_lonlat[2], 
+        alt = 2e7
+    )
+)
+# Now, we update the camera to look at Pittsburgh.
+cc = cameracontrols(ax.scene)
+cc.eyeposition[] = pittsburgh_ecef
+cc.lookat[] = Vec3d(0,0,0)
+cc.upvector[] = Vec3d(0,0,1)
+Makie.update_cam!(ax.scene, cc)
 
+# ## Satellite animation and Observables
 time_rel = Observable(0.001)
 
 satellite_marker = lift(time_rel) do t
