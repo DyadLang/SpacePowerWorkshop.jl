@@ -1,5 +1,5 @@
 using GLMakie
-using GeoMakie, Tyler
+using GeoMakie
 using GeoMakie.Proj, GeoMakie.GeometryBasics
 using GeoMakie.Makie.Observables
 
@@ -261,9 +261,6 @@ on(satellite_marker) do ecef
     Makie.update_cam!(view_ax.scene, cc)
 end
 
-@time record(fig, "dashboard_with_view.mp4", LinRange(3, 3.5, 3000); framerate = 60, update = false) do t
-    time_rel[] = t
-end
 
 
 # Here's the dashboard controls to run the animation interactively.
@@ -279,22 +276,20 @@ play_button_listener = on(play_button.clicks; priority = 1000) do _
     end
 end
 
-latest_is_playing = Makie.Observables.async_latest(is_playing)
-
-player_listener = Makie.Observables.on(latest_is_playing) do should_play
-    println("player_listener")
-    if should_play
-        while time_rel[] < 25 && is_playing[]
-            tic = time()
-            time_rel[] += 0.0003333333333333333
-            yield()
-            toc = time()
-            if tic - toc < 1/30
-                time_to_sleep = max(0, 1/30 - (toc - tic))
-                sleep(time_to_sleep)
-            end
-        end
+player_listener = Makie.Observables.on(events(fig).tick) do tick
+    if is_playing[]
+        tic = time()
+        time_rel[] += 1/3000
+        yield()
+        toc = time()
     else
-        # do nothing, since this will stop the while loop
+        # do nothing
     end
+end
+
+
+
+
+@time record(fig, "dashboard_with_view.mp4", LinRange(3, 3.5, 3000); framerate = 60, update = false) do t
+    time_rel[] = t
 end
