@@ -123,13 +123,13 @@ in_sunlight_label = Label(
     tellheight = false,
 )
 
-min_power, max_power = extrema(sol[panel.cell.Im.I * panel.cell.V.v])
+min_battery, max_battery = extrema(sol[panel.converter.stored_energy])
 
-power_label = Label(
+battery_label = Label(
     info_gl[1, 2],
-    @lift Makie.rich("Power: ", 
+    @lift Makie.rich("Battery: ", 
         Makie.rich(
-            lpad(string(round(Int, (sol($(time_rel); idxs = panel.cell.Im.I * panel.cell.V.v) - min_power) / (max_power - min_power) * 100)), 3);
+            lpad(string(round(Int, (sol($(time_rel); idxs = panel.converter.stored_energy) - min_battery) / (max_battery - min_battery) * 100)), 3);
             color = Makie.wong_colors(1.0)[1],
             font = "Fira Mono"
             ), 
@@ -151,15 +151,15 @@ time_label = Label(
     tellheight = false,
 )
 
-power_ax, power_plot = lines(
+battery_ax, battery_plot = lines(
     info_gl[1:2, 3],
     lift(time_rel) do t
         trange = LinRange(max(0, t - 90/(60*24)), t, 1000)
-        current_power = sol(trange; idxs = panel.cell.Im.I * panel.cell.V.v)
-        Point2f.(LinRange(0, 1, length(trange)), current_power)
+        current_battery = sol(trange; idxs = panel.converter.stored_energy)
+        Point2f.(LinRange(0, 1, length(trange)), current_battery)
     end;
     axis = (; 
-        limits = ((0, 1), (min_power, max_power)),
+        limits = ((0, 1), (min_battery, max_battery)),
         xticks = ([0, 0.5, 1], ["-90 min", "-45 min", "now"]),
     ),
     linewidth = 5
