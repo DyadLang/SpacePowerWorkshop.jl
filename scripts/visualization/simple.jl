@@ -122,3 +122,6 @@ satellite_trajectory_plt = plotlist!(ax.scene, satellite_trajectory_spec)
     time_rel[] = t_days
     # reset_limits!(power_ax)
 end
+
+screen = display(fig; update = false)
+wait(screen) # wait for display to close
