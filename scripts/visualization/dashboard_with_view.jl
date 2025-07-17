@@ -205,6 +205,8 @@ battery_ax, battery_plot = lines(
     linewidth = 5
 )
 
+screen = display(fig; update = false)
+
 # ## Ground track
 # We can also plot a ground track of the satellite.
 # Maybe this should have a Tyler map?  But that's too brittle.
@@ -287,9 +289,12 @@ player_listener = Makie.Observables.on(events(fig).tick) do tick
     end
 end
 
+wait(screen) # wait for display to close
 
 
-
+# To record a video over some timespan,
+#=
 @time record(fig, "dashboard_with_view.mp4", LinRange(3, 3.5, 3000); framerate = 60, update = false) do t
     time_rel[] = t
 end
+=#
