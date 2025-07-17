@@ -7,7 +7,19 @@
 @doc Markdown.doc"""
    TempSensor(; name, G, A, T_ref, α, ϵ, σ, theta, sunlight)
 
-Temperature sensor model# # This temperature sensor uses the hardcoded orbital parameters in the module# to compute the temperature on a solar panel at a given time in the orbit.# For this to work the module defining this must have two 1-argument callables# `theta_interp` and `sunlight_interp`.## Some notes I have from writing this:# - `using SpacePowerWorkshop: theta_interp(::Real)::Real` as suggested in the Dyad docs fails, \#   it's a lex and/or parse error but does not give me more information than that.# - How do I declare a variable as output or input?  Do I really have to create a connector specifically for this?#   - Following on this, can connectors be nested?# - The lack of comments is pretty annoying.
+Temperature sensor model
+
+This temperature sensor uses the hardcoded orbital parameters in the module
+to compute the temperature on a solar panel at a given time in the orbit.
+For this to work the module defining this must have two 1-argument callables
+`theta_interp` and `sunlight_interp`.
+
+Some notes I have from writing this:
+- `using SpacePowerWorkshop: theta_interp(::Real)::Real` as suggested in the Dyad docs fails, \
+it's a lex and/or parse error but does not give me more information than that.
+- How do I declare a variable as output or input?  Do I really have to create a connector specifically for this?
+- Following on this, can connectors be nested?
+- The lack of comments is pretty annoying.
 
 ## Parameters: 
 
