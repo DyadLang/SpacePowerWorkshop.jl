@@ -4,6 +4,8 @@ A Julia package for simulating a space-based solar power system, combining orbit
 
 Presented in the [Power Subsystem Design for Small Satellites in Julia](https://juliahub.com/company/resources/power-subsystem-design-for-small-satellites-webinar) webinar by [JuliaHub](https://juliahub.com).
 
+https://github.com/user-attachments/assets/1af1df9f-f640-434a-8578-047178a82f30
+
 ## What is this thing?
 
 This package contains:
