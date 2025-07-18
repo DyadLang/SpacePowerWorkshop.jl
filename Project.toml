@@ -1,7 +1,8 @@
 name = "SpacePowerWorkshop"
 uuid = "8c5872ae-171c-4c52-b73c-5e25d4616bb7"
-authors = [" <>"]
+authors = ["David Dinh <david.dinh@juliahub.com>", "Ben Chung <ben.chung@juliahub.com>", "Ranjan Anantharaman <ranjan.anantharaman@juliahub.com>", "Anshul Singhvi <anshul.singhvi@juliahub.com>"]
 version = "0.1.0"
+license = "MIT"
 
 [deps]
 BlockComponents = "1ef5d832-be8e-447f-9f2c-8b5d17d15fd3"
