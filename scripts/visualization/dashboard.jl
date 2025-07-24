@@ -60,7 +60,7 @@ sat_pos_ecef = @. SatelliteToolboxTransformations.r_eci_to_ecef(
 fig = with_theme(theme_dark()) do
     Figure(; figure_padding = 0, size = (1000, 600));
 end
-ax = GlobeAxis(fig[1, 1]; show_axis = false, width = 600, halign = :left, tellheight = true, tellwidth = true)
+ax = GlobeAxis(fig[1, 1]; show_axis = false, halign = :left, tellheight = true, tellwidth = true)
 # push!(ax.scene.lights, sun_light)
 earth_plt = meshimage!(
     ax, -180..180, -90..90, blue_marble_img;
