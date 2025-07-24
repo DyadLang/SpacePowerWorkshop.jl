@@ -60,7 +60,7 @@ sat_pos_ecef = @. SatelliteToolboxTransformations.r_eci_to_ecef(
 fig = with_theme(theme_dark()) do
     Figure(; figure_padding = 0, size = (1000, 600));
 end
-ax = GlobeAxis(fig[1, 1]; show_axis = false, width = 600, halign = :left, tellheight = true, tellwidth = true)
+ax = GlobeAxis(fig[1, 1]; show_axis = false, halign = :left, tellheight = true, tellwidth = true)
 # push!(ax.scene.lights, sun_light)
 earth_plt = meshimage!(
     ax, -180..180, -90..90, blue_marble_img;
@@ -278,18 +278,22 @@ play_button_listener = on(play_button.clicks; priority = 1000) do _
     end
 end
 
+timestep::Float64 = 1/3000
+
 player_listener = Makie.Observables.on(events(fig).tick) do tick
     if is_playing[]
         tic = time()
-        time_rel[] += 1/3000
+        if time_rel[] > sol.t[end] - 2timestep
+            time_rel[] = 0.001
+        else
+            time_rel[] += timestep
+        end
         yield()
         toc = time()
     else
         # do nothing
     end
 end
-
-wait(screen) # wait for display to close
 
 
 # To record a video over some timespan,
