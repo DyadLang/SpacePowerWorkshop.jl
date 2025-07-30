@@ -5,10 +5,10 @@
 ### Instead, update the Dyad source code and regenerate this file
 
 
+include("SolarPanelSimple_experiment.jl")
+include("SolarPanel_experiment.jl")
 include("DCDC_MPPT_experiment.jl")
+include("TempSensor_experiment.jl")
 include("PVCell_experiment.jl")
 include("PVCell_validate_experiment.jl")
 include("PVCellValidation_experiment.jl")
-include("SolarPanel_experiment.jl")
-include("SolarPanelSimple_experiment.jl")
-include("TempSensor_experiment.jl")

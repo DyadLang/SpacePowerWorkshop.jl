@@ -49,19 +49,19 @@ Photovoltaic cell model floating in space
 
   ### Symbolic Parameters
   __params = Any[]
-  append!(__params, @parameters (Rs::Float64 = Rs))
-  append!(__params, @parameters (Rp::Float64 = Rp))
-  append!(__params, @parameters (T::Float64 = T))
-  append!(__params, @parameters (Gn::Float64 = Gn))
-  append!(__params, @parameters (ipv_n::Float64 = ipv_n))
-  append!(__params, @parameters (Ki::Float64 = Ki))
-  append!(__params, @parameters (a::Float64 = a))
-  append!(__params, @parameters (Ns::Float64 = Ns))
-  append!(__params, @parameters (Vocn::Float64 = Vocn))
-  append!(__params, @parameters (Iscn::Float64 = Iscn))
-  append!(__params, @parameters (Kv::Float64 = Kv))
-  append!(__params, @parameters (k::Float64 = k))
-  append!(__params, @parameters (q::Float64 = q))
+  append!(__params, @parameters (Rs::Real = Rs))
+  append!(__params, @parameters (Rp::Real = Rp))
+  append!(__params, @parameters (T::Real = T))
+  append!(__params, @parameters (Gn::Real = Gn))
+  append!(__params, @parameters (ipv_n::Real = ipv_n))
+  append!(__params, @parameters (Ki::Real = Ki))
+  append!(__params, @parameters (a::Real = a))
+  append!(__params, @parameters (Ns::Real = Ns))
+  append!(__params, @parameters (Vocn::Real = Vocn))
+  append!(__params, @parameters (Iscn::Real = Iscn))
+  append!(__params, @parameters (Kv::Real = Kv))
+  append!(__params, @parameters (k::Real = k))
+  append!(__params, @parameters (q::Real = q))
 
   ### Variables
   __vars = Any[]

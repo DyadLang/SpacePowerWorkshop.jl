@@ -42,12 +42,12 @@ Idealized battery
 
   ### Symbolic Parameters
   __params = Any[]
-  append!(__params, @parameters (β::Float64 = β))
-  append!(__params, @parameters (q::Float64 = q))
-  append!(__params, @parameters (K::Float64 = K))
-  append!(__params, @parameters (hotel_load::Float64 = hotel_load))
-  append!(__params, @parameters (capacity::Float64 = capacity))
-  append!(__params, @parameters (power_rate::Float64 = power_rate))
+  append!(__params, @parameters (β::Real = β))
+  append!(__params, @parameters (q::Real = q))
+  append!(__params, @parameters (K::Real = K))
+  append!(__params, @parameters (hotel_load::Real = hotel_load))
+  append!(__params, @parameters (capacity::Real = capacity))
+  append!(__params, @parameters (power_rate::Real = power_rate))
 
   ### Variables
   __vars = Any[]

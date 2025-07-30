@@ -40,20 +40,18 @@ it's a lex and/or parse error but does not give me more information than that.
  * `T` - This connector represents a real signal as an output from a component ([`RealOutput`](@ref))
  * `time` - This connector represents a real signal as an input to a component ([`RealInput`](@ref))
 """
-@component function TempSensor(; name, G=1361, A=5, T_ref=300, α=0.9, ϵ=0.8, σ=5.67e-8)
-  thetaˍ₋value = theta_interp
-  sunlightˍ₋value = sunlight_interp
+@component function TempSensor(; name, G=1361, A=5, T_ref=300, α=0.9, ϵ=0.8, σ=5.67e-8, theta=theta_interp, sunlight=sunlight_interp)
 
   ### Symbolic Parameters
   __params = Any[]
-  append!(__params, @parameters (G::Float64 = G), [description = "solar irradiance at LEO orbit [W/m^2]"])
-  append!(__params, @parameters (A::Float64 = A), [description = "solar panel area [m^2]"])
-  append!(__params, @parameters (T_ref::Float64 = T_ref), [description = "reference temperature [K]"])
-  append!(__params, @parameters (α::Float64 = α), [description = "absorptivity of panel"])
-  append!(__params, @parameters (ϵ::Float64 = ϵ), [description = "emissivity of panel"])
-  append!(__params, @parameters (σ::Float64 = σ), [description = "Stefan-Boltzmann constant [W/(m^2*K^4)]"])
-  append!(__params, @parameters (theta::typeof(thetaˍ₋value))(..) = thetaˍ₋value)
-  append!(__params, @parameters (sunlight::typeof(sunlightˍ₋value))(..) = sunlightˍ₋value)
+  append!(__params, @parameters (G::Real = G), [description = "solar irradiance at LEO orbit [W/m^2]"])
+  append!(__params, @parameters (A::Real = A), [description = "solar panel area [m^2]"])
+  append!(__params, @parameters (T_ref::Real = T_ref), [description = "reference temperature [K]"])
+  append!(__params, @parameters (α::Real = α), [description = "absorptivity of panel"])
+  append!(__params, @parameters (ϵ::Real = ϵ), [description = "emissivity of panel"])
+  append!(__params, @parameters (σ::Real = σ), [description = "Stefan-Boltzmann constant [W/(m^2*K^4)]"])
+  append!(__params, @parameters theta(::Real)::Real = theta)
+  append!(__params, @parameters sunlight(::Real)::Real = sunlight)
 
   ### Variables
   __vars = Any[]

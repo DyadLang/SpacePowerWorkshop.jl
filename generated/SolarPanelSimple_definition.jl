@@ -38,14 +38,14 @@
 
   ### Symbolic Parameters
   __params = Any[]
-  append!(__params, @parameters (G::Float64 = G))
-  append!(__params, @parameters (A::Float64 = A))
-  append!(__params, @parameters (η_ref::Float64 = η_ref))
-  append!(__params, @parameters (T_ref::Float64 = T_ref))
-  append!(__params, @parameters (β::Float64 = β))
-  append!(__params, @parameters (α::Float64 = α))
-  append!(__params, @parameters (ϵ::Float64 = ϵ))
-  append!(__params, @parameters (σ::Float64 = σ))
+  append!(__params, @parameters (G::Real = G))
+  append!(__params, @parameters (A::Real = A))
+  append!(__params, @parameters (η_ref::Real = η_ref))
+  append!(__params, @parameters (T_ref::Real = T_ref))
+  append!(__params, @parameters (β::Real = β))
+  append!(__params, @parameters (α::Real = α))
+  append!(__params, @parameters (ϵ::Real = ϵ))
+  append!(__params, @parameters (σ::Real = σ))
 
   ### Variables
   __vars = Any[]
