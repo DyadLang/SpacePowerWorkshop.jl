@@ -30,16 +30,10 @@ blue_marble_img = load("bluemarble.png")
 starry_background_img = load("eso0932a.tif")
 
 # Finally, we run a simulation of the solar cell so we can show a dashboard of the power output.
-using ModelingToolkit, DyadInterface
-@time @mtkbuild panel = SolarPanel()
-prob = @time ODEProblem(
-    panel, 
-    [panel.converter.β => -28, panel.converter.stored_energy => 1], # parameter overrides
-    (0.0, SpacePowerWorkshop.end_time);                             # time span
-    guesses = [panel.cell.Im.i => 8.207600054307171, panel.converter.v => 1]
-)
-sol = @time solve(prob; dtmax=0.001)
+res = @time SolarPanelOrbitalTransient()
 
+(; sol, start_date, time_rel, sat_pos, sat_vel, sun_pos, sunlight, theta) = res
+times = time_rel
 # ### Satellite orbit
 # We want everything to be in the reference frame ECEF (Earth-Centered, Earth-Fixed)
 # since that is the best for GIS visualization.
@@ -49,12 +43,19 @@ sol = @time solve(prob; dtmax=0.001)
 # So, let's transform everything from TEME to ECEF.
 # The propagator is in TEME.
 eop = SatelliteToolboxTransformations.fetch_iers_eop()
-sat_pos_ecef = @. SatelliteToolboxTransformations.r_eci_to_ecef(
+transformations_in_time = SatelliteToolboxTransformations.r_eci_to_ecef.(
     (TEME(),),
     (ITRF(),),
-    SpacePowerWorkshop.times, # times in julian date
+    times .+ start_date, # times in julian date
     (eop,)
-) * SpacePowerWorkshop.sat_pos
+) 
+sat_pos_ecef = transformations_in_time .* sat_pos
+sat_integrated_pos_teme = sat_pos .+ sat_vel
+sat_integrated_pos_ecef = transformations_in_time .* sat_integrated_pos_teme
+sat_vel_ecef = sat_integrated_pos_ecef .- sat_pos_ecef
+sat_vel_dir_ecef = normalize.(sat_vel_ecef)
+
+
 
 # sun_light = Makie.DirectionalLight(Colors.WP_A |> RGBf, direction_from_sun_to_earth)
 fig = with_theme(theme_dark()) do
@@ -72,10 +73,6 @@ background_plt = meshimage!(
     uv_transform = :rotr90, zlevel = 2e8,
     shading = NoShading
 )
-# BUG SECTION
-# 1. The geomakie meshimage recipe does not propagate shading
-only(earth_plt.plots).shading[] = Makie.MultiLightShading
-# END BUG SECTION
 
 # ### View point for overview plot
 # We want to look down at the earth from some point in space,
@@ -108,13 +105,13 @@ satellite_trajectory = lift(time_rel) do t
 end
 
 sunlight_fraction = lift(time_rel) do t
-    SpacePowerWorkshop.sunlight_interp(t)
+    res.sunlight(t)
 end
 
 sun_line = lift(time_rel) do t
     idx = round(Int, t * 86400) + 1
     sat_pos = sat_pos_ecef[idx]
-    sun_pos = r_eci_to_ecef(TEME(), ITRF(), t + SpacePowerWorkshop.jd₀, eop) * SpacePowerWorkshop.sun_pos_teme[idx]
+    sun_pos = r_eci_to_ecef(TEME(), ITRF(), t + start_date, eop) * res.sun_pos[idx]
     Point3d[sun_pos, sat_pos]
 end
 
@@ -162,13 +159,13 @@ in_sunlight_label = Label(
     tellheight = true,
 )
 
-min_battery, max_battery = extrema(sol[panel.converter.stored_energy])
+min_battery, max_battery = extrema(sol[res.spec.model.converter.stored_energy])
 
 battery_label = Label(
     info_gl[1, 2],
     @lift Makie.rich("Battery: ", 
         Makie.rich(
-            lpad(string(round(Int, (sol($(time_rel); idxs = panel.converter.stored_energy) - min_battery) / (max_battery - min_battery) * 100)), 3);
+            lpad(string(round(Int, (sol($(time_rel); idxs = res.spec.model.converter.stored_energy) - min_battery) / (max_battery - min_battery) * 100)), 3);
             color = Makie.wong_colors(1.0)[1],
             font = "Fira Mono"
             ), 
@@ -183,7 +180,7 @@ time_label = Label(
     lift(time_rel) do t
         Makie.rich(
             "Time: ",
-            Dates.format(julian2datetime(t + SpacePowerWorkshop.jd₀), "u dd HH:MM:SS")
+            Dates.format(julian2datetime(t + start_date), "u dd HH:MM:SS")
         )
     end;
     tellwidth = false,
@@ -194,7 +191,7 @@ battery_ax, battery_plot = lines(
     info_gl[1:2, 3],
     lift(time_rel) do t
         trange = LinRange(max(0, t - 90/(60*24)), t, 1000)
-        current_battery = sol(trange; idxs = panel.converter.stored_energy)
+        current_battery = sol(trange; idxs = res.spec.model.converter.stored_energy)
         Point2f.(LinRange(0, 1, length(trange)), current_battery)
     end;
     axis = (; 
@@ -202,7 +199,7 @@ battery_ax, battery_plot = lines(
         xticks = ([0, 0.5, 1], ["-90 min", "-45 min", "now"]),
         alignmode = Outside(), # important so that the protrusions remain within the grid cell
     ),
-    linewidth = 5
+    linewidth = 3
 )
 
 screen = display(fig; update = false)
@@ -256,10 +253,13 @@ view_label = Label(diag_gl[2, 1], "Satellite View"; halign = :center, font = :bo
 view_ax = GlobeAxis(diag_gl[3, 1]; show_axis = false)
 meshimage!(view_ax, -180..180, -90..90, blue_marble_img; uv_transform = :rotr90)
 
-on(satellite_marker) do ecef
-    cc = Makie.cameracontrols(view_ax.scene)
+# Extract camera controls for the view axis
+cc = Makie.cameracontrols(view_ax.scene)
+# Update the camera when the satellite position changes
+satellite_view_listener = on(satellite_marker) do ecef
     cc.lookat[] = Vec3d(0,0,0)
     cc.eyeposition[] = ecef
+    cc.upvector[] = sat_vel_dir_ecef[round(Int, time_rel[] * 86400) + 1]
     Makie.update_cam!(view_ax.scene, cc)
 end
 
@@ -283,7 +283,7 @@ timestep::Float64 = 1/3000
 player_listener = Makie.Observables.on(events(fig).tick) do tick
     if is_playing[]
         tic = time()
-        if time_rel[] > sol.t[end] - 2timestep
+        if time_rel[] > sol.t[end] -52timestep
             time_rel[] = 0.001
         else
             time_rel[] += timestep

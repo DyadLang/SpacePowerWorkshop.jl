@@ -1,0 +1,67 @@
+
+
+# Run a transient analysis of a solar panel on an orbiting satellite.
+#
+# Provide a model of the solar panel, and this analysis will slot in the 
+# sunlight and angle interpolations as top level parameters.  Then, the
+# analysis will simulate the solar panel on the satellite.
+# 
+# ## Parameters
+# You can pass any parameter that is valid for TransientAnalysis, such as specifying
+# the algorithm via `alg`, or the tolerances `abstol` and `reltol`, or the `dtmax`.
+# 
+# You can also specify the orbital parameters.  These are from [SatelliteToolbox]()
+partial analysis OrbitalTransientAnalysis
+    extends Analysis
+    parameter alg::String = "Rodas5P"
+    parameter abstol::Real = 1e-6
+    parameter reltol::Real = 1e-6
+    parameter saveat::Real = 0
+    parameter dtmax::Real = 1e-3
+    parameter IfLifting::Boolean = false
+
+    # The parameter that the sunlight interpolation should be assigned to
+    parameter sunlight_interp_param::String = ""
+
+    # The parameter that the angle interpolation should be assigned to
+    parameter theta_interp_param::String = ""
+
+    # The start date of the analysis, **as a Julian date**.
+    # Obtain this from `SatelliteToolbox.date_to_jd(year, month, day, hh, mm, ss)`
+    parameter start_date::Real = date_to_jd(2026, 1, 1, 0, 0, 0)
+    # The number of days to simulate after start_date
+    parameter days::Real = 30
+    # The semi-major axis of the orbit
+    parameter semimajor_axis::Real = 7171e3
+    # The eccentricity of the orbit (small e)
+    parameter eccentricity::Real = 0.001
+    # The inclination of the orbit, in degrees
+    parameter inclination::Real = 60
+    # The RAAN of the orbit, in degrees
+    parameter raan::Real = 100
+    # The argument of perigee, in degrees
+    parameter argument_of_perigee::Real = 90
+    # The true anomaly, in degrees
+    parameter anomaly::Real = 20
+    # The solar panel model to simulate.  This must extend or 
+    # satisfy the [`PartialSolarPanel`](@ref) interface.
+    model::EmptyComponent = EmptyComponent()
+end
+
+# Run an orbital transient analysis on the `SolarPanel` model.
+#
+# This is how you customize the orbital transient analysis
+# to your own model, assuming it accepts sunlight and theta
+# interpolator functions.
+analysis SolarPanelOrbitalTransient
+    extends OrbitalTransientAnalysis(
+        sunlight_interp_param = "temp.sunlight",
+        theta_interp_param = "temp.theta"
+    )
+    model = SolarPanel()
+end
+
+partial analysis OrbitalGUI
+    extends OrbitalTransientAnalysis
+    parameter speed::Real = 1.0
+end
