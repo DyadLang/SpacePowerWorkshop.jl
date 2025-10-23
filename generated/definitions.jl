@@ -11,7 +11,6 @@ using OrdinaryDiffEqDefault
 using RuntimeGeneratedFunctions
 RuntimeGeneratedFunctions.init(@__MODULE__)
 
-D = Differential(t)
 
 import BlockComponents
 import DyadData
@@ -22,47 +21,47 @@ This connector represents an electrical pin with voltage and current as the pote
 """
 @connector function __Dyad__Pin(; name)
   vars = @variables begin
-    v(t), []
-    i(t), [connect = Flow]
+    (v(t)::Real), []
+    (i(t)::Real), [connect = Flow]
   end
-  return ODESystem(Equation[], t, vars, []; name)
+  return System(Equation[], t, vars, []; name)
 end
 @doc Markdown.doc"""
 This connector represents a thermal node with temperature and heat flow as the potential and flow variables, respectively.
 """
 @connector function __Dyad__Node(; name)
   vars = @variables begin
-    T(t), []
-    Q(t), [connect = Flow]
+    (T(t)::Real), []
+    (Q(t)::Real), [connect = Flow]
   end
-  return ODESystem(Equation[], t, vars, []; name)
+  return System(Equation[], t, vars, []; name)
 end
 @doc Markdown.doc"""
 This connector represents a mechanical flange with position and force as the potential and flow variables, respectively.
 """
 @connector function __Dyad__Flange(; name)
   vars = @variables begin
-    s(t), []
-    f(t), [connect = Flow]
+    (s(t)::Real), []
+    (f(t)::Real), [connect = Flow]
   end
-  return ODESystem(Equation[], t, vars, []; name)
+  return System(Equation[], t, vars, []; name)
 end
 @doc Markdown.doc"""
 This connector represents a rotational spline with angle and torque as the potential and flow variables, respectively.
 """
 @connector function __Dyad__Spline(; name)
   vars = @variables begin
-    phi(t), []
-    tau(t), [connect = Flow]
+    (phi(t)::Real), []
+    (tau(t)::Real), [connect = Flow]
   end
-  return ODESystem(Equation[], t, vars, []; name)
+  return System(Equation[], t, vars, []; name)
 end
 
-include("SolarPanelOrbitalTransient_definition.jl")
-include("SolarPanelSimple_definition.jl")
-include("SolarPanel_definition.jl")
 include("DCDC_MPPT_definition.jl")
-include("TempSensor_definition.jl")
+include("SolarPanelOrbitalTransient_definition.jl")
 include("PVCell_definition.jl")
 include("PVCell_validate_definition.jl")
 include("PVCellValidation_definition.jl")
+include("SolarPanel_definition.jl")
+include("SolarPanelSimple_definition.jl")
+include("TempSensor_definition.jl")

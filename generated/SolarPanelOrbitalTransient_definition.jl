@@ -36,7 +36,7 @@ using SpacePowerWorkshop: AbstractOrbitalTransientAnalysisSpec, OrbitalTransient
   var"argument_of_perigee"::Float64 = 90
   # The true anomaly, in degrees
   var"anomaly"::Float64 = 20
-  var"model"::Union{Nothing, ODESystem} = SpacePowerWorkshop.SolarPanel(; name=:SolarPanel)
+  var"model"::Union{Nothing, System} = SpacePowerWorkshop.SolarPanel(; name=:SolarPanel)
 end
 
 function DyadInterface.run_analysis(spec::SolarPanelOrbitalTransientSpec)

@@ -32,16 +32,22 @@ Idealized battery
 
 | Name         | Description                         | Units  | 
 | ------------ | ----------------------------------- | ------ | 
-| `v`         |                          | V  | 
-| `i`         |                          | A  | 
+| `v`         | Voltage across the component (between pin p and pin n).                         | V  | 
+| `i`         | Current flowing through the component (from pin p to pin n).                         | A  | 
 | `c`         |                          | --  | 
 | `stored_energy`         |                          | --  | 
 | `charge_power`         |                          | --  | 
 """
 @component function DCDC_MPPT(; name, β=nothing, q=1.602176634e-19, K=1.380649e-23, hotel_load=50, capacity=4, power_rate=300)
+  __params = Any[]
+  __vars = Any[]
+  __systems = System[]
+  __guesses = Dict()
+  __defaults = Dict()
+  __initialization_eqs = []
+  __eqs = Equation[]
 
   ### Symbolic Parameters
-  __params = Any[]
   append!(__params, @parameters (β::Real = β))
   append!(__params, @parameters (q::Real = q))
   append!(__params, @parameters (K::Real = K))
@@ -50,63 +56,42 @@ Idealized battery
   append!(__params, @parameters (power_rate::Real = power_rate))
 
   ### Variables
-  __vars = Any[]
-  append!(__vars, @variables T(t), [input = true])
-  append!(__vars, @variables Vt(t), [input = true])
-  append!(__vars, @variables (v(t)))
-  append!(__vars, @variables (i(t)))
-  append!(__vars, @variables (c(t)))
-  append!(__vars, @variables (stored_energy(t)))
-  append!(__vars, @variables (charge_power(t)))
+  append!(__vars, @variables (T(t)::Real), [input = true])
+  append!(__vars, @variables (Vt(t)::Real), [input = true])
+  append!(__vars, @variables (v(t)::Real), [description = "Voltage across the component (between pin p and pin n)."])
+  append!(__vars, @variables (i(t)::Real), [description = "Current flowing through the component (from pin p to pin n)."])
+  append!(__vars, @variables (c(t)::Real))
+  append!(__vars, @variables (stored_energy(t)::Real))
+  append!(__vars, @variables (charge_power(t)::Real))
 
   ### Constants
   __constants = Any[]
 
   ### Components
-  __systems = ODESystem[]
   push!(__systems, @named p = __Dyad__Pin())
   push!(__systems, @named n = __Dyad__Pin())
 
+  ### Guesses
+
   ### Defaults
-  __defaults = Dict()
 
   ### Initialization Equations
-  __initialization_eqs = []
+
+  ### Assertions
+  __assertions = []
 
   ### Equations
-  __eqs = Equation[]
   push!(__eqs, v ~ p.v - n.v)
   push!(__eqs, i ~ p.i)
   push!(__eqs, p.i + n.i ~ 0)
   push!(__eqs, log(max(i / v, 0.1)) - c * v ~ β)
   push!(__eqs, c ~ 1 / Vt)
-  push!(__eqs, D(stored_energy) ~ charge_power)
+  push!(__eqs, ModelingToolkit.D_nounits(stored_energy) ~ charge_power)
   # line 27 = lower bound
   # line 28 = upper bound
   push!(__eqs, charge_power ~ min(max(i * v - hotel_load, -power_rate * (tanh(10 * (stored_energy - 0.2)) + 1) / 2), power_rate * (tanh(10 * (-stored_energy + capacity)) + 1) / 2))
 
-  # Return completely constructed ODESystem
-  return ODESystem(__eqs, t, __vars, __params; systems=__systems, defaults=__defaults, name, initialization_eqs=__initialization_eqs)
+  # Return completely constructed System
+  return System(__eqs, t, __vars, __params; systems=__systems, defaults=__defaults, guesses=__guesses, name, initialization_eqs=__initialization_eqs, assertions=__assertions)
 end
 export DCDC_MPPT
-
-Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(DCDC_MPPT)) = print(io,
-  """<div style="height: 100%; width: 100%; background-color: white"><div style="margin: auto; height: 500px; width: 500px; padding: 200px"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000"
-    overflow="visible" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
-      <defs>
-        <filter id='red-shadow' color-interpolation-filters="sRGB"><feDropShadow dx="0" dy="0" stdDeviation="100" flood-color="#ff0000" flood-opacity="0.5"/></filter>
-        <filter id='green-shadow' color-interpolation-filters="sRGB"><feDropShadow dx="0" dy="0" stdDeviation="100" flood-color="#00ff00" flood-opacity="0.5"/></filter>
-        <filter id='blue-shadow' color-interpolation-filters="sRGB"><feDropShadow dx="0" dy="0" stdDeviation="100" flood-color="#0000ff" flood-opacity="0.5"/></filter>
-        <filter id='drop-shadow' color-interpolation-filters="sRGB"><feDropShadow dx="0" dy="0" stdDeviation="40" flood-opacity="0.5"/></filter>
-      </defs>
-    <g  transform="translate(-500 0) scale(0.1 0.1) rotate(0)" transform-origin="center center"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000"
-  shape-rendering="geometricPrecision" text-rendering="geometricPrecision" transform-origin="center center">
-  <rect rx="0" ry="0" width="1000" height="1000" fill="blue" stroke="blue" stroke-width="3"
-      vector-effect="non-scaling-stroke"></rect>
-</svg></g>
-<g  transform="translate(500 0) scale(0.1 0.1) rotate(0)" transform-origin="center center"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000"
-  shape-rendering="geometricPrecision" text-rendering="geometricPrecision" transform-origin="center center">
-  <rect rx="0" ry="0" width="1000" height="1000" fill="#d2dbed" stroke="blue" stroke-width="3"
-      vector-effect="non-scaling-stroke"></rect>
-</svg></g>
-      </svg></div></div>""")

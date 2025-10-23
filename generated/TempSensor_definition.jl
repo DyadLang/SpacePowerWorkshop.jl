@@ -41,9 +41,15 @@ it's a lex and/or parse error but does not give me more information than that.
  * `time` - This connector represents a real signal as an input to a component ([`RealInput`](@ref))
 """
 @component function TempSensor(; name, G=1361, A=5, T_ref=300, α=0.9, ϵ=0.8, σ=5.67e-8, theta=theta_interp, sunlight=sunlight_interp)
+  __params = Any[]
+  __vars = Any[]
+  __systems = System[]
+  __guesses = Dict()
+  __defaults = Dict()
+  __initialization_eqs = []
+  __eqs = Equation[]
 
   ### Symbolic Parameters
-  __params = Any[]
   append!(__params, @parameters (G::Real = G), [description = "solar irradiance at LEO orbit [W/m^2]"])
   append!(__params, @parameters (A::Real = A), [description = "solar panel area [m^2]"])
   append!(__params, @parameters (T_ref::Real = T_ref), [description = "reference temperature [K]"])
@@ -54,43 +60,31 @@ it's a lex and/or parse error but does not give me more information than that.
   append!(__params, @parameters sunlight(::Real)::Real = sunlight)
 
   ### Variables
-  __vars = Any[]
-  append!(__vars, @variables G_eff(t), [output = true])
-  append!(__vars, @variables T(t), [output = true])
-  append!(__vars, @variables time(t), [input = true])
+  append!(__vars, @variables (G_eff(t)::Real), [output = true])
+  append!(__vars, @variables (T(t)::Real), [output = true])
+  append!(__vars, @variables (time(t)::Real), [input = true])
 
   ### Constants
   __constants = Any[]
 
   ### Components
-  __systems = ODESystem[]
+
+  ### Guesses
 
   ### Defaults
-  __defaults = Dict()
 
   ### Initialization Equations
-  __initialization_eqs = []
+
+  ### Assertions
+  __assertions = []
 
   ### Equations
-  __eqs = Equation[]
   # Compute the effective solar irradiance
   push!(__eqs, G_eff ~ max(G * cos(theta(t)) * sunlight(t), 0))
   # Compute the temperature
   push!(__eqs, T ~ max(((α * G_eff) / (ϵ * σ)) ^ (1 / 4), 125))
 
-  # Return completely constructed ODESystem
-  return ODESystem(__eqs, t, __vars, __params; systems=__systems, defaults=__defaults, name, initialization_eqs=__initialization_eqs)
+  # Return completely constructed System
+  return System(__eqs, t, __vars, __params; systems=__systems, defaults=__defaults, guesses=__guesses, name, initialization_eqs=__initialization_eqs, assertions=__assertions)
 end
 export TempSensor
-
-Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(TempSensor)) = print(io,
-  """<div style="height: 100%; width: 100%; background-color: white"><div style="margin: auto; height: 500px; width: 500px; padding: 200px"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000"
-    overflow="visible" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
-      <defs>
-        <filter id='red-shadow' color-interpolation-filters="sRGB"><feDropShadow dx="0" dy="0" stdDeviation="100" flood-color="#ff0000" flood-opacity="0.5"/></filter>
-        <filter id='green-shadow' color-interpolation-filters="sRGB"><feDropShadow dx="0" dy="0" stdDeviation="100" flood-color="#00ff00" flood-opacity="0.5"/></filter>
-        <filter id='blue-shadow' color-interpolation-filters="sRGB"><feDropShadow dx="0" dy="0" stdDeviation="100" flood-color="#0000ff" flood-opacity="0.5"/></filter>
-        <filter id='drop-shadow' color-interpolation-filters="sRGB"><feDropShadow dx="0" dy="0" stdDeviation="40" flood-opacity="0.5"/></filter>
-      </defs>
-    
-      </svg></div></div>""")

@@ -43,9 +43,15 @@
 | `over_v`         |                          | --  | 
 """
 @component function PVCell_validate(; name, Rs=0.221, Rp=415.405, T=300.15, Gn=1000, G=1000, ipv_n=8.214, Ki=0.0032, ΔT=nothing, a=1.3, Ns=54, Vocn=32.9, Iscn=8.21, Kv=-0.123, k=1.380649e-23, q=1.602176634e-19)
+  __params = Any[]
+  __vars = Any[]
+  __systems = System[]
+  __guesses = Dict()
+  __defaults = Dict()
+  __initialization_eqs = []
+  __eqs = Equation[]
 
   ### Symbolic Parameters
-  __params = Any[]
   append!(__params, @parameters (Rs::Real = Rs))
   append!(__params, @parameters (Rp::Real = Rp))
   append!(__params, @parameters (T::Real = T))
@@ -63,31 +69,31 @@
   append!(__params, @parameters (q::Real = q))
 
   ### Variables
-  __vars = Any[]
-  append!(__vars, @variables Vt(t), [output = true])
-  append!(__vars, @variables (ipv(t)))
-  append!(__vars, @variables (i0(t)))
-  append!(__vars, @variables (rolloff(t)))
-  append!(__vars, @variables (over_v(t)))
+  append!(__vars, @variables (Vt(t)::Real), [output = true])
+  append!(__vars, @variables (ipv(t)::Real))
+  append!(__vars, @variables (i0(t)::Real))
+  append!(__vars, @variables (rolloff(t)::Real))
+  append!(__vars, @variables (over_v(t)::Real))
 
   ### Constants
   __constants = Any[]
 
   ### Components
-  __systems = ODESystem[]
   push!(__systems, @named p = __Dyad__Pin())
   push!(__systems, @named n = __Dyad__Pin())
   push!(__systems, @named V = ElectricalComponents.VoltageSensor())
   push!(__systems, @named Im = ElectricalComponents.CurrentSource())
 
+  ### Guesses
+
   ### Defaults
-  __defaults = Dict()
 
   ### Initialization Equations
-  __initialization_eqs = []
+
+  ### Assertions
+  __assertions = []
 
   ### Equations
-  __eqs = Equation[]
   push!(__eqs, ipv ~ G / Gn * (ipv_n + Ki * ΔT))
   push!(__eqs, Vt ~ Ns * (T + ΔT) * k / q)
   push!(__eqs, i0 ~ (Iscn + Ki * ΔT) / (exp((Vocn + Kv * ΔT) / (a * Vt)) - 1))
@@ -98,19 +104,7 @@
   push!(__eqs, connect(V.n, Im.p, n))
   push!(__eqs, connect(V.p, Im.n))
 
-  # Return completely constructed ODESystem
-  return ODESystem(__eqs, t, __vars, __params; systems=__systems, defaults=__defaults, name, initialization_eqs=__initialization_eqs)
+  # Return completely constructed System
+  return System(__eqs, t, __vars, __params; systems=__systems, defaults=__defaults, guesses=__guesses, name, initialization_eqs=__initialization_eqs, assertions=__assertions)
 end
 export PVCell_validate
-
-Base.show(io::IO, a::MIME"image/svg+xml", t::typeof(PVCell_validate)) = print(io,
-  """<div style="height: 100%; width: 100%; background-color: white"><div style="margin: auto; height: 500px; width: 500px; padding: 200px"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000"
-    overflow="visible" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
-      <defs>
-        <filter id='red-shadow' color-interpolation-filters="sRGB"><feDropShadow dx="0" dy="0" stdDeviation="100" flood-color="#ff0000" flood-opacity="0.5"/></filter>
-        <filter id='green-shadow' color-interpolation-filters="sRGB"><feDropShadow dx="0" dy="0" stdDeviation="100" flood-color="#00ff00" flood-opacity="0.5"/></filter>
-        <filter id='blue-shadow' color-interpolation-filters="sRGB"><feDropShadow dx="0" dy="0" stdDeviation="100" flood-color="#0000ff" flood-opacity="0.5"/></filter>
-        <filter id='drop-shadow' color-interpolation-filters="sRGB"><feDropShadow dx="0" dy="0" stdDeviation="40" flood-opacity="0.5"/></filter>
-      </defs>
-    
-      </svg></div></div>""")
