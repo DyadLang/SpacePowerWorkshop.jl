@@ -198,6 +198,7 @@ function run_orbit(; start_date, days, semimajor_axis, eccentricity, inclination
     return (; time_rel = times_adj, sat_pos, sat_vel, sun_pos_teme, sunlight_interp, theta_interp)
 end
 
+# Only for backwards compatibility; this should be deleteable
 (; time_rel, sat_pos, sat_vel, sun_pos_teme, sunlight_interp, theta_interp) = run_orbit(;
     start_date = date_to_jd(2026, 1, 1, 0, 0, 0),
     days = 30,
