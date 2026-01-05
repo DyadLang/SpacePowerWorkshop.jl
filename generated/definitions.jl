@@ -6,15 +6,19 @@
 
 using ModelingToolkit
 import Markdown
+import Moshi
 using ModelingToolkit: t_nounits as t
 using OrdinaryDiffEqDefault
 using RuntimeGeneratedFunctions
 RuntimeGeneratedFunctions.init(@__MODULE__)
 
+if isfile(joinpath((@__DIR__) |> Base.dirname, "dyad", "definitions.jl"))
+  include(joinpath((@__DIR__) |> Base.dirname, "dyad", "definitions.jl"))
+end
 
+import DyadInterface
 import BlockComponents
 import DyadData
-import DyadInterface
 import ElectricalComponents
 @doc Markdown.doc"""
 This connector represents an electrical pin with voltage and current as the potential and flow variables, respectively.
@@ -58,10 +62,10 @@ This connector represents a rotational spline with angle and torque as the poten
 end
 
 include("DCDC_MPPT_definition.jl")
-include("SolarPanelOrbitalTransient_definition.jl")
+include("PVCellValidation_definition.jl")
 include("PVCell_definition.jl")
 include("PVCell_validate_definition.jl")
-include("PVCellValidation_definition.jl")
-include("SolarPanel_definition.jl")
+include("SolarPanelOrbitalTransient_definition.jl")
 include("SolarPanelSimple_definition.jl")
+include("SolarPanel_definition.jl")
 include("TempSensor_definition.jl")

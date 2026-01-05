@@ -12,22 +12,13 @@ using SpacePowerWorkshop: jd_to_gmst, date_to_jd
 using LinearAlgebra, Dates
 
 # ## Setup
-# We will use some image assets for the visualization, these should all be publically usable.
-
-# Full-sky mosaic from the European Southern Observatory.
-# [Source webpage here.](https://www.eso.org/public/images/eso0932a/)
-if !isfile("eso0932a.tif")
-    download("https://cdn.eso.org/images/original/eso0932a.tif", "eso0932a.tif")
-end
-# NASA full-earth blue marble in July.
-# [acknowledgment](https://visibleearth.nasa.gov/images/74092/july-blue-marble-next-generation)
-if !isfile("bluemarble.png")
-    download("https://eoimages.gsfc.nasa.gov/images/imagerecords/76000/76487/world.200406.3x5400x2700.png", "bluemarble.png")
-end
+# We will use some image assets for the visualization, these are all publicly usable.  Attribution is also available.
 # Load these images into memory as matrices of RGB
+using GeoMakieArtifacts
 using FileIO, ImageIO
-blue_marble_img = load("bluemarble.png")
-starry_background_img = load("eso0932a.tif")
+blue_marble_img = FileIO.load(joinpath(geomakie_artifact_dir("blue_marble_regular_january"), "image.png"))
+starry_background_img = FileIO.load(joinpath(geomakie_artifact_dir("skymap"), "skymap.png"))
+
 
 # Finally, we run a simulation of the solar cell so we can show a dashboard of the power output.
 res = @time SolarPanelOrbitalTransient()

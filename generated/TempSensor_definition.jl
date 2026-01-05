@@ -7,32 +7,18 @@
 @doc Markdown.doc"""
    TempSensor(; name, G, A, T_ref, α, ϵ, σ, theta, sunlight)
 
-Temperature sensor model
-
-This temperature sensor uses the hardcoded orbital parameters in the module
-to compute the temperature on a solar panel at a given time in the orbit.
-For this to work the module defining this must have two 1-argument callables
-`theta_interp` and `sunlight_interp`.
-
-Some notes I have from writing this:
-- `using SpacePowerWorkshop: theta_interp(::Real)::Real` as suggested in the Dyad docs fails, \
-it's a lex and/or parse error but does not give me more information than that.
-- How do I declare a variable as output or input?  Do I really have to create a connector specifically for this?
-- Following on this, can connectors be nested?
-- The lack of comments is pretty annoying.
-
 ## Parameters: 
 
 | Name         | Description                         | Units  |   Default value |
 | ------------ | ----------------------------------- | ------ | --------------- |
-| `G`         | solar irradiance at LEO orbit [W/m^2]                         | --  |   1361 |
-| `A`         | solar panel area [m^2]                         | --  |   5 |
-| `T_ref`         | reference temperature [K]                         | --  |   300 |
-| `α`         | absorptivity of panel                         | --  |   0.9 |
-| `ϵ`         | emissivity of panel                         | --  |   0.8 |
-| `σ`         | Stefan-Boltzmann constant [W/(m^2*K^4)]                         | --  |   5.67e-8 |
-| `theta`         | Interpolator for the angle between the solar panel normal and the Sun direction                         | --  |   theta_interp |
-| `sunlight`         | Interpolator for the sunlight intensity (0 to 1)                         | --  |   sunlight_interp |
+| `G`         |                          | --  |   1361 |
+| `A`         |                          | --  |   5 |
+| `T_ref`         |                          | --  |   300 |
+| `α`         |                          | --  |   0.9 |
+| `ϵ`         |                          | --  |   0.8 |
+| `σ`         |                          | --  |   5.67e-8 |
+| `theta`         |                          | --  |   theta_interp |
+| `sunlight`         |                          | --  |   sunlight_interp |
 
 ## Connectors
 
@@ -50,12 +36,12 @@ it's a lex and/or parse error but does not give me more information than that.
   __eqs = Equation[]
 
   ### Symbolic Parameters
-  append!(__params, @parameters (G::Real = G), [description = "solar irradiance at LEO orbit [W/m^2]"])
-  append!(__params, @parameters (A::Real = A), [description = "solar panel area [m^2]"])
-  append!(__params, @parameters (T_ref::Real = T_ref), [description = "reference temperature [K]"])
-  append!(__params, @parameters (α::Real = α), [description = "absorptivity of panel"])
-  append!(__params, @parameters (ϵ::Real = ϵ), [description = "emissivity of panel"])
-  append!(__params, @parameters (σ::Real = σ), [description = "Stefan-Boltzmann constant [W/(m^2*K^4)]"])
+  append!(__params, @parameters (G::Real = G))
+  append!(__params, @parameters (A::Real = A))
+  append!(__params, @parameters (T_ref::Real = T_ref))
+  append!(__params, @parameters (α::Real = α))
+  append!(__params, @parameters (ϵ::Real = ϵ))
+  append!(__params, @parameters (σ::Real = σ))
   append!(__params, @parameters theta(::Real)::Real = theta)
   append!(__params, @parameters sunlight(::Real)::Real = sunlight)
 
@@ -79,9 +65,7 @@ it's a lex and/or parse error but does not give me more information than that.
   __assertions = []
 
   ### Equations
-  # Compute the effective solar irradiance
   push!(__eqs, G_eff ~ max(G * cos(theta(t)) * sunlight(t), 0))
-  # Compute the temperature
   push!(__eqs, T ~ max(((α * G_eff) / (ϵ * σ)) ^ (1 / 4), 125))
 
   # Return completely constructed System

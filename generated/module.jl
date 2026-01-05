@@ -3,8 +3,10 @@
 ### If you edit this code it is likely to get overwritten.
 ### Instead, update the Dyad source code and regenerate this file
 
+if isfile(joinpath((@__DIR__) |> Base.dirname, "dyad", "module.jl"))
+  include(joinpath((@__DIR__) |> Base.dirname, "dyad", "module.jl"))
+end
+include("types.jl")
 include("definitions.jl")
 include("experiments.jl")
-include("types.jl")
 include("precompilation.jl")
-# submodules:

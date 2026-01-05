@@ -10,12 +10,17 @@ using OrdinaryDiffEqDefault
 using RuntimeGeneratedFunctions
 RuntimeGeneratedFunctions.init(@__MODULE__)
 
+if isfile(joinpath((@__DIR__) |> Base.dirname, "dyad", "tests.jl"))
+  include(joinpath((@__DIR__) |> Base.dirname, "dyad", "tests.jl"))
+end
 
 
+@testset "`SpacePowerWorkshop`" begin
 include("DCDC_MPPT_test.jl")
+include("PVCellValidation_test.jl")
 include("PVCell_test.jl")
 include("PVCell_validate_test.jl")
-include("PVCellValidation_test.jl")
-include("SolarPanel_test.jl")
 include("SolarPanelSimple_test.jl")
+include("SolarPanel_test.jl")
 include("TempSensor_test.jl")
+end
