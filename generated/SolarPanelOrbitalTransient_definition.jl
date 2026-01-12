@@ -15,26 +15,15 @@ using SpacePowerWorkshop: AbstractOrbitalTransientAnalysisSpec, OrbitalTransient
   var"saveat"::Float64 = 0
   var"dtmax"::Float64 = 0.001
   var"IfLifting"::Bool = false
-  # The parameter that the sunlight interpolation should be assigned to
   var"sunlight_interp_param"::String = "temp.sunlight"
-  # The parameter that the angle interpolation should be assigned to
   var"theta_interp_param"::String = "temp.theta"
-  # The start date of the analysis, **as a Julian date**.
-  # Obtain this from `SatelliteToolbox.date_to_jd(year, month, day, hh, mm, ss)`
   var"start_date"::Float64 = date_to_jd(2026, 1, 1, 0, 0, 0)
-  # The number of days to simulate after start_date
   var"days"::Float64 = 30
-  # The semi-major axis of the orbit
   var"semimajor_axis"::Float64 = 7171000
-  # The eccentricity of the orbit (small e)
   var"eccentricity"::Float64 = 0.001
-  # The inclination of the orbit, in degrees
   var"inclination"::Float64 = 60
-  # The RAAN of the orbit, in degrees
   var"raan"::Float64 = 100
-  # The argument of perigee, in degrees
   var"argument_of_perigee"::Float64 = 90
-  # The true anomaly, in degrees
   var"anomaly"::Float64 = 20
   var"model"::Union{Nothing, System} = SpacePowerWorkshop.SolarPanel(; name=:SolarPanel)
 end

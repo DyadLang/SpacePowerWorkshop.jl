@@ -1,8 +1,8 @@
 name = "SpacePowerWorkshop"
 uuid = "8c5872ae-171c-4c52-b73c-5e25d4616bb7"
-authors = ["David Dinh <david.dinh@juliahub.com>", "Ben Chung <ben.chung@juliahub.com>", "Ranjan Anantharaman <ranjan.anantharaman@juliahub.com>", "Anshul Singhvi <anshul.singhvi@juliahub.com>"]
-version = "0.1.0"
 license = "MIT"
+version = "0.1.1"
+authors = ["David Dinh <david.dinh@juliahub.com>", "Ben Chung <ben.chung@juliahub.com>", "Ranjan Anantharaman <ranjan.anantharaman@juliahub.com>", "Anshul Singhvi <anshul.singhvi@juliahub.com>"]
 
 [deps]
 BlockComponents = "1ef5d832-be8e-447f-9f2c-8b5d17d15fd3"
@@ -15,7 +15,7 @@ ElectricalComponents = "3fc4c519-469d-4ff5-98c9-d4d06b1514a2"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
 ModelingToolkit = "961ee093-0014-501f-94e3-6117800e7a78"
-# ModelingToolkitStandardLibrary = "16a59e39-deab-5bd0-87e4-056b12336739"
+Moshi = "2e0e35c7-a2e4-4343-998d-7ef72827ed2d"
 OrdinaryDiffEqDefault = "50262376-6c5a-4cf5-baba-aaf4f84d72d7"
 PrecompileTools = "aea7be01-6a6a-4083-8856-8a6e6704d82a"
 RuntimeGeneratedFunctions = "7e49a35a-f44a-4d26-94aa-eba1b4ca6b47"
@@ -24,14 +24,15 @@ SatelliteToolbox = "6ac157d9-b43d-51bb-8fab-48bf53814f4a"
 SciMLBase = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
 
 [compat]
-BlockComponents = "2.3"
+BlockComponents = "3"
 CairoMakie = "0.13.10, 0.14, 0.15"
 DataInterpolations = "7, 8"
-DyadData = "1.2"
-DyadEcosystemDependencies = "=0.10.5"
-ElectricalComponents = "0.20"
+DyadData = "2"
+DyadEcosystemDependencies = "=0.10.6"
+ElectricalComponents = "1"
 LinearAlgebra = "1"
 Markdown = "1"
+Moshi = "0.3.7"
 SatelliteAnalysis = "0.3"
 SatelliteToolbox = "1"
 
